@@ -1,0 +1,2177 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>弟子規・入則孝（拼音與印尼文互動遊戲）</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 QRCode 產生器函式庫 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- 引入 Google Fonts 傳統宋體與書法字型 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Zhi+Mang+Xing&display=swap" rel="stylesheet">
+
+    <style>
+        /* 自訂古風宣紙與水墨樣式 */
+        :root {
+            --paper-bg: #f6f1e3;
+            --paper-card: #fcf9f2;
+            --ink-primary: #26221e;
+            --ink-secondary: #5c5346;
+            --cinnabar: #b8332a;
+            --cinnabar-dark: #8f221b;
+            --jade: #3b6e5c;
+            --gold-accent: #c59b43;
+            --border-wood: #d6c8b2;
+        }
+
+        body {
+            background-color: var(--paper-bg);
+            color: var(--ink-primary);
+            font-family: 'Noto Serif TC', serif;
+            background-image: 
+                radial-gradient(rgba(180, 165, 140, 0.16) 1px, transparent 0),
+                radial-gradient(rgba(160, 145, 120, 0.1) 1px, transparent 0);
+            background-size: 24px 24px;
+            background-position: 0 0, 12px 12px;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        /* 拼音 Ruby 排版優化：確保所有漢字上方拼音清晰不重疊 */
+        ruby {
+            ruby-align: center;
+            margin: 0 1px;
+        }
+        rt {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+            font-size: 0.56em;
+            font-weight: 600;
+            color: #7c382e;
+            letter-spacing: 0.02em;
+            line-height: 1.1;
+            transform: translateY(-1px);
+        }
+        .ruby-line {
+            line-height: 2.35;
+        }
+        .ruby-title rt {
+            font-size: 0.34em;
+            color: #8f221b;
+        }
+
+        /* 書法標題字體 */
+        .font-calligraphy {
+            font-family: 'Zhi Mang Xing', 'Noto Serif TC', cursive, serif;
+        }
+
+        /* 傳統捲軸與書頁卡片 */
+        .scroll-card {
+            background-color: var(--paper-card);
+            border: 2px solid var(--border-wood);
+            box-shadow: 
+                0 10px 25px -5px rgba(44, 34, 22, 0.12),
+                0 0 0 6px var(--paper-card),
+                0 0 0 7px rgba(197, 155, 67, 0.4);
+            position: relative;
+        }
+
+        /* 四角傳統回紋裝飾 */
+        .corner-deco::before, .corner-deco::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--gold-accent);
+            pointer-events: none;
+        }
+        .corner-deco::before {
+            top: 8px;
+            left: 8px;
+            border-right: none;
+            border-bottom: none;
+        }
+        .corner-deco::after {
+            bottom: 8px;
+            right: 8px;
+            border-left: none;
+            border-top: none;
+        }
+
+        /* 硃砂印章樣式 */
+        .seal-stamp {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--cinnabar);
+            color: var(--cinnabar);
+            font-weight: 900;
+            border-radius: 6px;
+            padding: 3px 10px;
+            box-shadow: inset 0 0 0 1px rgba(184, 51, 42, 0.25);
+            background: rgba(184, 51, 42, 0.04);
+        }
+
+        .seal-rank {
+            border: 4px double var(--cinnabar);
+            color: var(--cinnabar);
+            background: rgba(184, 51, 42, 0.06);
+            box-shadow: 0 4px 12px rgba(184, 51, 42, 0.15);
+            animation: stampDrop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes stampDrop {
+            0% { transform: scale(2.1) rotate(-10deg); opacity: 0; }
+            100% { transform: scale(1) rotate(-3deg); opacity: 1; }
+        }
+
+        /* 選項按鈕互動質感 */
+        .option-btn {
+            background: linear-gradient(to bottom, #ffffff, #f7f2e7);
+            border: 1.5px solid #cbbba0;
+            transition: all 0.2s ease;
+            box-shadow: 0 3px 0 #cbbba0;
+        }
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            border-color: var(--gold-accent);
+            background: #fffdf9;
+            box-shadow: 0 5px 0 #b8a37e;
+        }
+        .option-btn:active:not(:disabled) {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #cbbba0;
+        }
+
+        /* 答對與答錯狀態 */
+        .option-correct {
+            background: linear-gradient(to bottom, #e8f5ef, #d2ebe0) !important;
+            border-color: var(--jade) !important;
+            color: #1d4235 !important;
+            box-shadow: 0 3px 0 var(--jade) !important;
+        }
+        .option-wrong {
+            background: linear-gradient(to bottom, #fbeae8, #f5d5d2) !important;
+            border-color: var(--cinnabar) !important;
+            color: var(--cinnabar-dark) !important;
+            box-shadow: 0 3px 0 var(--cinnabar) !important;
+        }
+
+        /* 傳統硃砂主按鈕 */
+        .btn-cinnabar {
+            background: linear-gradient(180deg, #c93b31 0%, #9e261e 100%);
+            color: #fffaf0;
+            border: 1px solid #7a1912;
+            box-shadow: 0 4px 0 #6e1610, 0 8px 15px rgba(158, 38, 30, 0.25);
+            transition: all 0.15s ease;
+        }
+        .btn-cinnabar:hover {
+            filter: brightness(1.06);
+            transform: translateY(-1px);
+        }
+        .btn-cinnabar:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #6e1610;
+        }
+
+        /* 淡入動畫 */
+        .fade-in {
+            animation: fadeIn 0.35s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 水墨雲紋背景裝飾 */
+        .ink-circle {
+            position: fixed;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(38, 34, 30, 0.04) 0%, rgba(38, 34, 30, 0) 70%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* QR Code 容器美化 */
+        #qrcodeBox img, #qrcodeBox canvas {
+            margin: 0 auto;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-3 sm:p-6">
+
+    <!-- 背景水墨意境圓暈 -->
+    <div class="ink-circle w-96 h-96 -top-20 -left-20"></div>
+    <div class="ink-circle w-[500px] h-[500px] -bottom-32 -right-24"></div>
+
+    <!-- 頂部書院導覽列 -->
+    <header class="w-full max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-2 py-2 px-2 mb-2">
+        <div class="flex items-center gap-2 sm:gap-3 cursor-pointer" onclick="returnToMenu()">
+            <span class="seal-stamp text-xs sm:text-sm ruby-line">
+                <ruby><rb>入</rb><rt>rù</rt></ruby><ruby><rb>則</rb><rt>zé</rt></ruby><ruby><rb>孝</rb><rt>xiào</rt></ruby>
+            </span>
+            <h1 class="text-lg sm:text-2xl font-bold tracking-wider text-[#26221e] ruby-line">
+                <ruby><rb>弟</rb><rt>dì</rt></ruby><ruby><rb>子</rb><rt>zǐ</rt></ruby><ruby><rb>規</rb><rt>guī</rt></ruby>・<ruby><rb>孝</rb><rt>xiào</rt></ruby><ruby><rb>道</rb><rt>dào</rt></ruby><ruby><rb>書</rb><rt>shū</rt></ruby><ruby><rb>院</rb><rt>yuàn</rt></ruby>
+            </h1>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <!-- 背景音樂 BGM 開關 -->
+            <button id="bgmToggleBtn" onclick="toggleBGM()" class="px-2.5 py-1.5 rounded-lg border border-[#d6c8b2] bg-[#fcf9f2] hover:bg-[#f2ead8] text-[#5c5346] transition flex items-center gap-1.5 text-xs sm:text-sm cursor-pointer" title="切換古箏背景音樂">
+                <span id="bgmIcon" class="text-base">🎶</span>
+                <span id="bgmLabel" class="ruby-line font-semibold">
+                    <ruby><rb>琴</rb><rt>qín</rt></ruby><ruby><rb>樂</rb><rt>yuè</rt></ruby>：<ruby><rb>關</rb><rt>guān</rt></ruby>
+                </span>
+            </button>
+
+            <!-- 音效 SFX 開關 -->
+            <button id="sfxToggleBtn" onclick="toggleSFX()" class="px-2.5 py-1.5 rounded-lg border border-[#d6c8b2] bg-[#fcf9f2] hover:bg-[#f2ead8] text-[#5c5346] transition flex items-center gap-1.5 text-xs sm:text-sm cursor-pointer" title="切換答題音效">
+                <span id="sfxIcon" class="text-base">🔔</span>
+                <span id="sfxLabel" class="ruby-line font-semibold">
+                    <ruby><rb>音</rb><rt>yīn</rt></ruby><ruby><rb>效</rb><rt>xiào</rt></ruby>：<ruby><rb>開</rb><rt>kāi</rt></ruby>
+                </span>
+            </button>
+
+            <!-- 返回首頁按鈕（遊戲中顯示） -->
+            <button id="homeBtn" onclick="returnToMenu()" class="hidden px-3 py-1.5 rounded-lg border border-[#d6c8b2] bg-[#fcf9f2] hover:bg-[#f2ead8] text-[#5c5346] text-xs sm:text-sm font-semibold transition ruby-line cursor-pointer">
+                <ruby><rb>返</rb><rt>fǎn</rt></ruby><ruby><rb>回</rb><rt>huí</rt></ruby><ruby><rb>首</rb><rt>shǒu</rt></ruby><ruby><rb>頁</rb><rt>yè</rt></ruby>
+            </button>
+        </div>
+    </header>
+
+    <!-- 主內容區 -->
+    <main class="w-full max-w-4xl mx-auto my-auto flex-grow flex flex-col justify-center">
+
+        <!-- ==================== 1. 首頁大廳畫面 ==================== -->
+        <section id="menuScreen" class="scroll-card corner-deco rounded-2xl p-6 sm:p-10 text-center fade-in">
+            <div class="w-24 h-1 bg-[#c59b43] mx-auto mb-4 rounded-full opacity-70"></div>
+
+            <div class="mb-2">
+                <span class="seal-stamp text-sm px-3 py-1 ruby-line">
+                    <ruby><rb>聖</rb><rt>shèng</rt></ruby><ruby><rb>人</rb><rt>rén</rt></ruby><ruby><rb>訓</rb><rt>xùn</rt></ruby>・<ruby><rb>首</rb><rt>shǒu</rt></ruby><ruby><rb>孝</rb><rt>xiào</rt></ruby><ruby><rb>弟</rb><rt>tì</rt></ruby>
+                </span>
+            </div>
+
+            <h2 class="font-calligraphy text-5xl sm:text-6xl text-[#26221e] my-3 tracking-wider ruby-title ruby-line">
+                <ruby><rb>入</rb><rt>rù</rt></ruby><ruby><rb>則</rb><rt>zé</rt></ruby><ruby><rb>孝</rb><rt>xiào</rt></ruby><ruby><rb>書</rb><rt>shū</rt></ruby><ruby><rb>院</rb><rt>yuàn</rt></ruby>
+            </h2>
+
+            <p class="text-sm sm:text-base text-[#5c5346] max-w-xl mx-auto mb-2 ruby-line">
+                「<ruby><rb>父</rb><rt>fù</rt></ruby><ruby><rb>母</rb><rt>mǔ</rt></ruby><ruby><rb>呼</rb><rt>hū</rt></ruby>，<ruby><rb>應</rb><rt>yìng</rt></ruby><ruby><rb>勿</rb><rt>wù</rt></ruby><ruby><rb>緩</rb><rt>huǎn</rt></ruby>；<ruby><rb>父</rb><rt>fù</rt></ruby><ruby><rb>母</rb><rt>mǔ</rt></ruby><ruby><rb>命</rb><rt>mìng</rt></ruby>，<ruby><rb>行</rb><rt>xíng</rt></ruby><ruby><rb>勿</rb><rt>wù</rt></ruby><ruby><rb>懶</rb><rt>lǎn</rt></ruby>。」
+            </p>
+            <p class="text-xs sm:text-sm text-[#7a6e5d] mb-7 italic">
+                Belajar Bakti kepada Orang Tua (Ru Ze Xiao) • Dilengkapi Pinyin & Penjelasan Bahasa Indonesia
+            </p>
+
+            <!-- 模式選擇卡片 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-left mb-6">
+                <!-- 模式一：經典接龍 -->
+                <button onclick="startSoloGame('classic')" class="option-btn rounded-xl p-5 flex flex-col justify-between group cursor-pointer">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-[#f2e8d5] text-[#8c6229] ruby-line">
+                                <ruby><rb>模</rb><rt>mó</rt></ruby><ruby><rb>式</rb><rt>shì</rt></ruby><ruby><rb>一</rb><rt>yī</rt></ruby>
+                            </span>
+                            <span class="text-xl">📜</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-[#26221e] group-hover:text-[#b8332a] transition mb-1 ruby-line">
+                            <ruby><rb>經</rb><rt>jīng</rt></ruby><ruby><rb>典</rb><rt>diǎn</rt></ruby><ruby><rb>接</rb><rt>jiē</rt></ruby><ruby><rb>龍</rb><rt>lóng</rt></ruby>
+                        </h3>
+                        <p class="text-xs sm:text-sm text-[#6e6252] ruby-line">
+                            <ruby><rb>根</rb><rt>gēn</rt></ruby><ruby><rb>據</rb><rt>jù</rt></ruby><ruby><rb>上</rb><rt>shàng</rt></ruby><ruby><rb>句</rb><rt>jù</rt></ruby><ruby><rb>選</rb><rt>xuǎn</rt></ruby><ruby><rb>出</rb><rt>chū</rt></ruby><ruby><rb>正</rb><rt>zhèng</rt></ruby><ruby><rb>確</rb><rt>què</rt></ruby><ruby><rb>的</rb><rt>de</rt></ruby>《<ruby><rb>入</rb><rt>rù</rt></ruby><ruby><rb>則</rb><rt>zé</rt></ruby><ruby><rb>孝</rb><rt>xiào</rt></ruby>》<ruby><rb>下</rb><rt>xià</rt></ruby><ruby><rb>句</rb><rt>jù</rt></ruby>。
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-2 border-t border-[#e8decb] flex items-center justify-between text-xs font-bold text-[#b8332a] ruby-line">
+                        <span><ruby><rb>共</rb><rt>gòng</rt></ruby> 8 <ruby><rb>題</rb><rt>tí</rt></ruby></span>
+                        <span><ruby><rb>開</rb><rt>kāi</rt></ruby><ruby><rb>始</rb><rt>shǐ</rt></ruby><ruby><rb>修</rb><rt>xiū</rt></ruby><ruby><rb>習</rb><rt>xí</rt></ruby> →</span>
+                    </div>
+                </button>
+
+                <!-- 模式二：生活情境大考驗 -->
+                <button onclick="startSoloGame('scenario')" class="option-btn rounded-xl p-5 flex flex-col justify-between group cursor-pointer">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-[#e4efe9] text-[#2c5949] ruby-line">
+                                <ruby><rb>模</rb><rt>mó</rt></ruby><ruby><rb>式</rb><rt>shì</rt></ruby><ruby><rb>二</rb><rt>èr</rt></ruby>
+                            </span>
+                            <span class="text-xl">🍵</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-[#26221e] group-hover:text-[#b8332a] transition mb-1 ruby-line">
+                            <ruby><rb>生</rb><rt>shēng</rt></ruby><ruby><rb>活</rb><rt>huó</rt></ruby><ruby><rb>孝</rb><rt>xiào</rt></ruby><ruby><rb>道</rb><rt>dào</rt></ruby>
+                        </h3>
+                        <p class="text-xs sm:text-sm text-[#6e6252] ruby-line">
+                            <ruby><rb>面</rb><rt>miàn</rt></ruby><ruby><rb>對</rb><rt>duì</rt></ruby><ruby><rb>父</rb><rt>fù</rt></ruby><ruby><rb>母</rb><rt>mǔ</rt></ruby><ruby><rb>呼</rb><rt>hū</rt></ruby><ruby><rb>喚</rb><rt>huàn</rt></ruby>、<ruby><rb>勸</rb><rt>quàn</rt></ruby><ruby><rb>諫</rb><rt>jiàn</rt></ruby><ruby><rb>與</rb><rt>yǔ</rt></ruby><ruby><rb>問</rb><rt>wèn</rt></ruby><ruby><rb>安</rb><rt>ān</rt></ruby><ruby><rb>情</rb><rt>qíng</rt></ruby><ruby><rb>境</rb><rt>jìng</rt></ruby>。
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-2 border-t border-[#e8decb] flex items-center justify-between text-xs font-bold text-[#b8332a] ruby-line">
+                        <span><ruby><rb>共</rb><rt>gòng</rt></ruby> 8 <ruby><rb>題</rb><rt>tí</rt></ruby></span>
+                        <span><ruby><rb>進</rb><rt>jìn</rt></ruby><ruby><rb>入</rb><rt>rù</rt></ruby><ruby><rb>歷</rb><rt>lì</rt></ruby><ruby><rb>練</rb><rt>liàn</rt></ruby> →</span>
+                    </div>
+                </button>
+
+                <!-- 模式三：入則孝總複習 -->
+                <button onclick="startSoloGame('mixed')" class="option-btn rounded-xl p-5 flex flex-col justify-between group cursor-pointer border-[#c59b43]">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-[#fae8e6] text-[#b8332a] ruby-line">
+                                <ruby><rb>綜</rb><rt>zōng</rt></ruby><ruby><rb>合</rb><rt>hé</rt></ruby><ruby><rb>大</rb><rt>dà</rt></ruby><ruby><rb>考</rb><rt>kǎo</rt></ruby>
+                            </span>
+                            <span class="text-xl">🏮</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-[#26221e] group-hover:text-[#b8332a] transition mb-1 ruby-line">
+                            <ruby><rb>入</rb><rt>rù</rt></ruby><ruby><rb>則</rb><rt>zé</rt></ruby><ruby><rb>孝</rb><rt>xiào</rt></ruby><ruby><rb>殿</rb><rt>diàn</rt></ruby><ruby><rb>試</rb><rt>shì</rt></ruby>
+                        </h3>
+                        <p class="text-xs sm:text-sm text-[#6e6252] ruby-line">
+                            <ruby><rb>融</rb><rt>róng</rt></ruby><ruby><rb>合</rb><rt>hé</rt></ruby><ruby><rb>經</rb><rt>jīng</rt></ruby><ruby><rb>典</rb><rt>diǎn</rt></ruby><ruby><rb>經</rb><rt>jīng</rt></ruby><ruby><rb>文</rb><rt>wén</rt></ruby><ruby><rb>與</rb><rt>yǔ</rt></ruby><ruby><rb>日</rb><rt>rì</rt></ruby><ruby><rb>常</rb><rt>cháng</rt></ruby><ruby><rb>行</rb><rt>xíng</rt></ruby><ruby><rb>孝</rb><rt>xiào</rt></ruby><ruby><rb>考</rb><rt>kǎo</rt></ruby><ruby><rb>驗</rb><rt>yàn</rt></ruby>。
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-2 border-t border-[#e8decb] flex items-center justify-between text-xs font-bold text-[#b8332a] ruby-line">
+                        <span><ruby><rb>精</rb><rt>jīng</rt></ruby><ruby><rb>選</rb><rt>xuǎn</rt></ruby> 8 <ruby><rb>題</rb><rt>tí</rt></ruby></span>
+                        <span><ruby><rb>赴</rb><rt>fù</rt></ruby><ruby><rb>京</rb><rt>jīng</rt></ruby><ruby><rb>趕</rb><rt>gǎn</rt></ruby><ruby><rb>考</rb><rt>kǎo</rt></ruby> →</span>
+                    </div>
+                </button>
+            </div>
+
+            <!-- 底部小提示 -->
+            <div class="text-xs sm:text-sm text-[#7a6e5d] flex flex-wrap items-center justify-center gap-4 pt-2 ruby-line">
+                <span>🎶 <ruby><rb>點</rb><rt>diǎn</rt></ruby><ruby><rb>擊</rb><rt>jī</rt></ruby><ruby><rb>開</rb><rt>kāi</rt></ruby><ruby><rb>始</rb><rt>shǐ</rt></ruby><ruby><rb>自</rb><rt>zì</rt></ruby><ruby><rb>動</rb><rt>dòng</rt></ruby><ruby><rb>播</rb><rt>bō</rt></ruby><ruby><rb>放</rb><rt>fàng</rt></ruby><ruby><rb>古</rb><rt>gǔ</rt></ruby><ruby><rb>箏</rb><rt>zhēng</rt></ruby><ruby><rb>琴</rb><rt>qín</rt></ruby><ruby><rb>樂</rb><rt>yuè</rt></ruby></span>
+                <span>🇮🇩 <ruby><rb>答</rb><rt>dá</rt></ruby><ruby><rb>對</rb><rt>duì</rt></ruby><ruby><rb>附</rb><rt>fù</rt></ruby><ruby><rb>印</rb><rt>yìn</rt></ruby><ruby><rb>尼</rb><rt>ní</rt></ruby><ruby><rb>文</rb><rt>wén</rt></ruby><ruby><rb>詳</rb><rt>xiáng</rt></ruby><ruby><rb>細</rb><rt>xì</rt></ruby><ruby><rb>註</rb><rt>zhù</rt></ruby><ruby><rb>解</rb><rt>jiě</rt></ruby></span>
+            </div>
+
+            <!-- 多人掃碼共學專區 -->
+            <div class="mt-7 pt-6 border-t-2 border-dashed border-[#d6c8b2]">
+                <div class="mb-3">
+                    <span class="seal-stamp text-xs sm:text-sm ruby-line">
+                        📱 <ruby><rb>多</rb><rt>duō</rt></ruby><ruby><rb>人</rb><rt>rén</rt></ruby><ruby><rb>掃</rb><rt>sǎo</rt></ruby><ruby><rb>碼</rb><rt>mǎ</rt></ruby>・<ruby><rb>同</rb><rt>tóng</rt></ruby><ruby><rb>步</rb><rt>bù</rt></ruby><ruby><rb>共</rb><rt>gòng</rt></ruby><ruby><rb>學</rb><rt>xué</rt></ruby>
+                    </span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
+                    <!-- 主持開房按鈕 -->
+                    <button onclick="openHostSetup()" class="option-btn rounded-xl p-4 sm:p-5 flex items-center justify-between group cursor-pointer border-[#b8332a]/50 bg-gradient-to-br from-[#fffdf8] to-[#f8efe0]">
+                        <div>
+                            <div class="text-xs font-bold text-[#b8332a] mb-1 ruby-line">
+                                <ruby><rb>老</rb><rt>lǎo</rt></ruby><ruby><rb>師</rb><rt>shī</rt></ruby> / <ruby><rb>主</rb><rt>zhǔ</rt></ruby><ruby><rb>持</rb><rt>chí</rt></ruby><ruby><rb>人</rb><rt>rén</rt></ruby> (Host)
+                            </div>
+                            <h4 class="text-base sm:text-lg font-bold text-[#26221e] group-hover:text-[#b8332a] transition ruby-line">
+                                <ruby><rb>主</rb><rt>zhǔ</rt></ruby><ruby><rb>持</rb><rt>chí</rt></ruby><ruby><rb>開</rb><rt>kāi</rt></ruby><ruby><rb>房</rb><rt>fáng</rt></ruby>・<ruby><rb>產</rb><rt>chǎn</rt></ruby><ruby><rb>生</rb><rt>shēng</rt></ruby> QR Code
+                            </h4>
+                            <p class="text-xs text-[#6e6252] mt-1 ruby-line">
+                                <ruby><rb>投</rb><rt>tóu</rt></ruby><ruby><rb>影</rb><rt>yǐng</rt></ruby><ruby><rb>二</rb><rt>èr</rt></ruby><ruby><rb>維</rb><rt>wéi</rt></ruby><ruby><rb>碼</rb><rt>mǎ</rt></ruby>，<ruby><rb>邀</rb><rt>yāo</rt></ruby><ruby><rb>請</rb><rt>qǐng</rt></ruby><ruby><rb>大</rb><rt>dà</rt></ruby><ruby><rb>家</rb><rt>jiā</rt></ruby><ruby><rb>掃</rb><rt>sǎo</rt></ruby><ruby><rb>碼</rb><rt>mǎ</rt></ruby><ruby><rb>同</rb><rt>tóng</rt></ruby><ruby><rb>樂</rb><rt>lè</rt></ruby>
+                            </p>
+                        </div>
+                        <span class="text-3xl ml-3">📲</span>
+                    </button>
+
+                    <!-- 掃碼/輸入房號加入按鈕 -->
+                    <button onclick="openJoinRoom()" class="option-btn rounded-xl p-4 sm:p-5 flex items-center justify-between group cursor-pointer border-[#3b6e5c]/50 bg-gradient-to-br from-[#fffdf8] to-[#ebf3ef]">
+                        <div>
+                            <div class="text-xs font-bold text-[#3b6e5c] mb-1 ruby-line">
+                                <ruby><rb>學</rb><rt>xué</rt></ruby><ruby><rb>生</rb><rt>shēng</rt></ruby> / <ruby><rb>參</rb><rt>cān</rt></ruby><ruby><rb>與</rb><rt>yù</rt></ruby><ruby><rb>者</rb><rt>zhě</rt></ruby> (Player)
+                            </div>
+                            <h4 class="text-base sm:text-lg font-bold text-[#26221e] group-hover:text-[#3b6e5c] transition ruby-line">
+                                <ruby><rb>輸</rb><rt>shū</rt></ruby><ruby><rb>入</rb><rt>rù</rt></ruby><ruby><rb>房</rb><rt>fáng</rt></ruby><ruby><rb>號</rb><rt>hào</rt></ruby><ruby><rb>加</rb><rt>jiā</rt></ruby><ruby><rb>入</rb><rt>rù</rt></ruby><ruby><rb>書</rb><rt>shū</rt></ruby><ruby><rb>院</rb><rt>yuàn</rt></ruby>
+                            </h4>
+                            <p class="text-xs text-[#6e6252] mt-1 ruby-line">
+                                <ruby><rb>填</rb><rt>tián</rt></ruby><ruby><rb>寫</rb><rt>xiě</rt></ruby><ruby><rb>房</rb><rt>fáng</rt></ruby><ruby><rb>號</rb><rt>hào</rt></ruby><ruby><rb>與</rb><rt>yǔ</rt></ruby><ruby><rb>暱</rb><rt>nì</rt></ruby><ruby><rb>稱</rb><rt>chēng</rt></ruby><ruby><rb>即</rb><rt>jí</rt></ruby><ruby><rb>可</rb><rt>kě</rt></ruby><ruby><rb>參</rb><rt>cān</rt></ruby><ruby><rb>賽</rb><rt>sài</rt></ruby>
+                            </p>
+                        </div>
+                        <span class="text-3xl ml-3">✍️</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 1B. 多人房間大廳與對戰畫面 ==================== -->
+        <section id="multiplayerScreen" class="hidden scroll-card corner-deco rounded-2xl p-5 sm:p-8 fade-in">
+            <!-- 動態內容容器，由多人同步引擎即時渲染 -->
+            <div id="mpContainer"></div>
+        </section>
+
+        <!-- ==================== 2. 單人遊戲答題畫面 ==================== -->
+        <section id="gameScreen" class="hidden scroll-card corner-deco rounded-2xl p-5 sm:p-8 fade-in">
+            <!-- 頂部狀態與進度欄 -->
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-5 border-b border-[#e3d7c3]">
+                <div class="flex items-center gap-3">
+                    <span id="modeBadge" class="seal-stamp text-xs ruby-line"></span>
+                    <span class="text-sm font-bold text-[#5c5346] ruby-line">
+                        <ruby><rb>第</rb><rt>dì</rt></ruby> <span id="currentQNum" class="text-[#b8332a] text-base">1</span> / <span id="totalQNum">8</span> <ruby><rb>題</rb><rt>tí</rt></ruby>
+                    </span>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <!-- 連勝徽章 -->
+                    <div id="streakBox" class="hidden items-center gap-1 px-2.5 py-1 rounded-full bg-[#fdf3dc] border border-[#e0be6b] text-xs font-bold text-[#9c6b19] ruby-line">
+                        <span>🔥</span>
+                        <span><ruby><rb>連</rb><rt>lián</rt></ruby><ruby><rb>勝</rb><rt>shèng</rt></ruby> <span id="streakCount">0</span></span>
+                    </div>
+
+                    <!-- 當前積分 -->
+                    <div class="text-sm font-bold text-[#26221e] bg-[#f2ead8] px-3 py-1 rounded-lg border border-[#d6c8b2] ruby-line">
+                        <ruby><rb>文</rb><rt>wén</rt></ruby><ruby><rb>采</rb><rt>cǎi</rt></ruby><ruby><rb>值</rb><rt>zhí</rt></ruby>：<span id="scoreDisplay" class="text-[#b8332a] font-black">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 進度條 -->
+            <div class="w-full h-2 bg-[#e8decb] rounded-full overflow-hidden mb-5">
+                <div id="progressBar" class="h-full bg-gradient-to-r from-[#c59b43] to-[#b8332a] transition-all duration-500 rounded-full" style="width: 12%;"></div>
+            </div>
+
+            <!-- 題目展示區 -->
+            <div id="questionContainer" class="mb-6">
+                <!-- 章節標籤 -->
+                <div class="flex items-center gap-2 mb-3">
+                    <span id="chapterTag" class="text-xs sm:text-sm font-semibold px-3 py-1 rounded bg-[#ebe2d0] text-[#5c5346] ruby-line"></span>
+                </div>
+
+                <!-- 題幹內容 -->
+                <div id="questionPrompt" class="bg-[#f7f2e6] border border-[#dfd3be] rounded-xl p-5 sm:p-6 text-center shadow-inner">
+                    <!-- JS 動態填入 -->
+                </div>
+            </div>
+
+            <!-- 四個選項區 -->
+            <div id="optionsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6">
+                <!-- JS 動態生成選項按鈕 -->
+            </div>
+
+            <!-- 答題解析反饋面板（答題後展開，答對以印尼文重點注解） -->
+            <div id="feedbackPanel" class="hidden rounded-xl p-4 sm:p-5 mb-5 border-2 transition-all fade-in">
+                <div class="flex items-start gap-3">
+                    <div id="feedbackIcon" class="text-2xl mt-1">✨</div>
+                    <div class="flex-1">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                            <h4 id="feedbackTitle" class="font-bold text-base sm:text-lg ruby-line"></h4>
+                            <span id="pointsEarnedBadge" class="text-xs font-bold px-2.5 py-1 rounded bg-white/80 ruby-line"></span>
+                        </div>
+                        <!-- 完整經文（帶拼音） -->
+                        <div id="feedbackVerse" class="font-bold text-base sm:text-lg text-[#26221e] my-2 p-2.5 rounded-lg bg-white/60 border border-[#dfd3be] ruby-line"></div>
+                        <!-- 印尼文註解說明 -->
+                        <div id="feedbackIndoBox" class="mt-2.5 p-3 rounded-lg bg-white/80 border-l-4 border-[#3b6e5c]">
+                            <div class="text-xs font-bold uppercase tracking-wider text-[#3b6e5c] mb-1">
+                                🇮🇩 Penjelasan Bahasa Indonesia (印尼文注解)
+                            </div>
+                            <p id="feedbackIndoText" class="text-sm sm:text-base text-[#26221e] leading-relaxed font-medium"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 下一題按鈕 -->
+            <div id="nextBtnContainer" class="hidden text-right">
+                <button id="nextBtn" onclick="nextQuestion()" class="btn-cinnabar px-6 py-3 rounded-xl font-bold text-sm sm:text-base tracking-wider cursor-pointer w-full sm:w-auto ruby-line">
+                </button>
+            </div>
+        </section>
+
+        <!-- ==================== 3. 結算與書院評級畫面 ==================== -->
+        <section id="resultScreen" class="hidden scroll-card corner-deco rounded-2xl p-6 sm:p-10 text-center fade-in">
+            <p class="text-xs sm:text-sm text-[#6e6252] tracking-widest mb-2 ruby-line">
+                <ruby><rb>入</rb><rt>rù</rt></ruby><ruby><rb>則</rb><rt>zé</rt></ruby><ruby><rb>孝</rb><rt>xiào</rt></ruby><ruby><rb>考</rb><rt>kǎo</rt></ruby><ruby><rb>核</rb><rt>hé</rt></ruby><ruby><rb>完</rb><rt>wán</rt></ruby><ruby><rb>畢</rb><rt>bì</rt></ruby>・<ruby><rb>書</rb><rt>shū</rt></ruby><ruby><rb>院</rb><rt>yuàn</rt></ruby><ruby><rb>放</rb><rt>fàng</rt></ruby><ruby><rb>榜</rb><rt>bǎng</rt></ruby>
+            </p>
+
+            <!-- 硃砂功名印章 -->
+            <div class="my-5 flex justify-center">
+                <div class="seal-rank px-8 py-4 rounded-xl inline-block">
+                    <div class="text-xs tracking-widest opacity-80 mb-1 ruby-line">
+                        <ruby><rb>欽</rb><rt>qīn</rt></ruby><ruby><rb>點</rb><rt>diǎn</rt></ruby><ruby><rb>功</rb><rt>gōng</rt></ruby><ruby><rb>名</rb><rt>míng</rt></ruby>
+                    </div>
+                    <div id="rankTitle" class="font-calligraphy text-5xl sm:text-6xl tracking-widest ruby-title ruby-line"></div>
+                </div>
+            </div>
+
+            <!-- 評語（中文拼音 + 印尼文） -->
+            <p id="rankComment" class="text-sm sm:text-base text-[#3b342c] font-semibold max-w-lg mx-auto mb-2 ruby-line"></p>
+            <p id="rankCommentIndo" class="text-xs sm:text-sm text-[#3b6e5c] italic max-w-lg mx-auto mb-6"></p>
+
+            <!-- 成績數據面板 -->
+            <div class="grid grid-cols-3 gap-2 sm:gap-4 max-w-md mx-auto bg-[#f5efe2] border border-[#dcd0ba] rounded-xl p-4 mb-6">
+                <div>
+                    <div class="text-xs text-[#6e6252] ruby-line"><ruby><rb>總</rb><rt>zǒng</rt></ruby><ruby><rb>文</rb><rt>wén</rt></ruby><ruby><rb>采</rb><rt>cǎi</rt></ruby><ruby><rb>值</rb><rt>zhí</rt></ruby></div>
+                    <div id="finalScore" class="text-xl sm:text-2xl font-black text-[#b8332a] mt-1">0</div>
+                </div>
+                <div class="border-x border-[#dcd0ba]">
+                    <div class="text-xs text-[#6e6252] ruby-line"><ruby><rb>答</rb><rt>dá</rt></ruby><ruby><rb>對</rb><rt>duì</rt></ruby><ruby><rb>題</rb><rt>tí</rt></ruby><ruby><rb>數</rb><rt>shù</rt></ruby></div>
+                    <div id="finalAccuracy" class="text-xl sm:text-2xl font-black text-[#3b6e5c] mt-1">0/0</div>
+                </div>
+                <div>
+                    <div class="text-xs text-[#6e6252] ruby-line"><ruby><rb>最</rb><rt>zuì</rt></ruby><ruby><rb>高</rb><rt>gāo</rt></ruby><ruby><rb>連</rb><rt>lián</rt></ruby><ruby><rb>勝</rb><rt>shèng</rt></ruby></div>
+                    <div id="finalMaxStreak" class="text-xl sm:text-2xl font-black text-[#b88428] mt-1">0</div>
+                </div>
+            </div>
+
+            <!-- 錯題回顧區 -->
+            <div id="wrongReviewSection" class="hidden text-left max-w-2xl mx-auto mb-7">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="seal-stamp text-xs ruby-line"><ruby><rb>溫</rb><rt>wēn</rt></ruby><ruby><rb>故</rb><rt>gù</rt></ruby><ruby><rb>知</rb><rt>zhī</rt></ruby><ruby><rb>新</rb><rt>xīn</rt></ruby></span>
+                    <h3 class="font-bold text-sm sm:text-base text-[#26221e] ruby-line">
+                        <ruby><rb>錯</rb><rt>cuò</rt></ruby><ruby><rb>題</rb><rt>tí</rt></ruby><ruby><rb>精</rb><rt>jīng</rt></ruby><ruby><rb>選</rb><rt>xuǎn</rt></ruby><ruby><rb>回</rb><rt>huí</rt></ruby><ruby><rb>顧</rb><rt>gù</rt></ruby>
+                    </h3>
+                </div>
+                <div id="wrongList" class="space-y-3 max-h-72 overflow-y-auto pr-1">
+                    <!-- JS 動態填入錯題 -->
+                </div>
+            </div>
+
+            <!-- 底部操作按鈕 -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <button onclick="restartCurrentMode()" class="btn-cinnabar px-6 py-3 rounded-xl font-bold text-sm sm:text-base w-full sm:w-auto cursor-pointer ruby-line">
+                    <ruby><rb>再</rb><rt>zài</rt></ruby><ruby><rb>試</rb><rt>shì</rt></ruby><ruby><rb>一</rb><rt>yī</rt></ruby><ruby><rb>次</rb><rt>cì</rt></ruby>
+                </button>
+                <button onclick="returnToMenu()" class="option-btn px-6 py-3 rounded-xl font-bold text-sm sm:text-base text-[#26221e] w-full sm:w-auto cursor-pointer ruby-line">
+                    <ruby><rb>選</rb><rt>xuǎn</rt></ruby><ruby><rb>擇</rb><rt>zé</rt></ruby><ruby><rb>其</rb><rt>qí</rt></ruby><ruby><rb>他</rb><rt>tā</rt></ruby><ruby><rb>模</rb><rt>mó</rt></ruby><ruby><rb>式</rb><rt>shì</rt></ruby>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 頁尾古典格言 -->
+    <footer class="w-full max-w-4xl mx-auto text-center py-3 mt-4 text-xs sm:text-sm text-[#7a6e5d] ruby-line">
+        <p>「<ruby><rb>首</rb><rt>shǒu</rt></ruby><ruby><rb>孝</rb><rt>xiào</rt></ruby><ruby><rb>弟</rb><rt>tì</rt></ruby>，<ruby><rb>次</rb><rt>cì</rt></ruby><ruby><rb>謹</rb><rt>jǐn</rt></ruby><ruby><rb>信</rb><rt>xìn</rt></ruby>」——《<ruby><rb>弟</rb><rt>dì</rt></ruby><ruby><rb>子</rb><rt>zǐ</rt></ruby><ruby><rb>規</rb><rt>guī</rt></ruby>・<ruby><rb>入</rb><rt>rù</rt></ruby><ruby><rb>則</rb><rt>zé</rt></ruby><ruby><rb>孝</rb><rt>xiào</rt></ruby>》</p>
+    </footer>
+
+    <!-- ==================== JavaScript 遊戲邏輯、拼音映射、音樂與題庫 ==================== -->
+    <script>
+        /**
+         * 漢字 -> 漢語拼音（帶聲調）字典
+         * 涵蓋所有《弟子規・入則孝》經文與題庫選項用字
+         */
+        const PINYIN_DICT = {
+            "弟": "dì", "子": "zǐ", "規": "guī", "入": "rù", "則": "zé", "孝": "xiào",
+            "父": "fù", "母": "mǔ", "呼": "hū", "應": "yìng", "勿": "wù", "緩": "huǎn",
+            "命": "mìng", "行": "xíng", "懶": "lǎn", "教": "jiào", "須": "xū", "敬": "jìng",
+            "聽": "tīng", "責": "zé", "順": "shùn", "承": "chéng", "冬": "dōng", "溫": "wēn",
+            "夏": "xià", "凊": "qìng", "晨": "chén", "省": "xǐng", "昏": "hūn", "定": "dìng",
+            "出": "chū", "必": "bì", "告": "gào", "反": "fǎn", "面": "miàn", "居": "jū",
+            "有": "yǒu", "常": "cháng", "業": "yè", "無": "wú", "變": "biàn", "事": "shì",
+            "雖": "suī", "小": "xiǎo", "擅": "shàn", "為": "wéi", "苟": "gǒu", "道": "dào",
+            "虧": "kuī", "物": "wù", "私": "sī", "藏": "cáng", "親": "qīn", "心": "xīn",
+            "傷": "shāng", "所": "suǒ", "好": "hào", "力": "lì", "具": "jù", "惡": "wù",
+            "謹": "jǐn", "去": "qù", "身": "shēn", "貽": "yí", "憂": "yōu", "德": "dé",
+            "羞": "xiū", "愛": "ài", "我": "wǒ", "何": "hé", "難": "nán", "憎": "zēng",
+            "方": "fāng", "賢": "xián", "過": "guò", "諫": "jiàn", "使": "shǐ", "更": "gēng",
+            "怡": "yí", "吾": "wú", "色": "sè", "柔": "róu", "聲": "shēng", "不": "bù",
+            "悅": "yuè", "復": "fù", "號": "háo", "泣": "qì", "隨": "suí", "撻": "tà",
+            "怨": "yuàn", "疾": "jí", "藥": "yào", "先": "xiān", "嘗": "cháng", "晝": "zhòu",
+            "夜": "yè", "侍": "shì", "離": "lí", "床": "chuáng", "喪": "sāng", "三": "sān",
+            "年": "nián", "悲": "bēi", "咽": "yè", "處": "chù", "酒": "jiǔ", "肉": "ròu",
+            "絕": "jué", "盡": "jìn", "禮": "lǐ", "祭": "jì", "誠": "chéng", "死": "sǐ",
+            "者": "zhě", "如": "rú", "生": "shēng",
+            // 題庫與介面常用字
+            "請": "qǐng", "接": "jiē", "正": "zhèng", "確": "què", "的": "de", "下": "xià",
+            "一": "yī", "句": "jù", "經": "jīng", "文": "wén", "情": "qíng", "境": "jìng",
+            "你": "nǐ", "在": "zài", "房": "fáng", "間": "jiān", "裡": "lǐ", "看": "kàn",
+            "書": "shū", "聽": "tīng", "到": "dào", "媽": "mā", "叫": "jiào", "名": "míng",
+            "字": "zì", "該": "gāi", "怎": "zěn", "麼": "me", "做": "zuò", "立": "lì",
+            "刻": "kè", "回": "huí", "答": "dá", "並": "bìng", "走": "zǒu", "過": "guò",
+            "去": "qù", "詢": "xún", "問": "wèn", "假": "jiǎ", "裝": "zhuāng", "沒": "méi",
+            "見": "jiàn", "等": "děng", "完": "wán", "再": "zài", "說": "shuō", "耐": "nài",
+            "煩": "fán", "地": "de", "大": "dà", "喊": "hǎn", "很": "hěn", "忙": "máng",
+            "坐": "zuò", "著": "zhe", "動": "dòng", "當": "dāng", "指": "zhǐ", "出": "chū",
+            "功": "gōng", "課": "kè", "誤": "wù", "時": "shí", "應": "yīng", "恭": "gōng",
+            "聆": "líng", "虛": "xū", "改": "gǎi", "進": "jìn", "頂": "dǐng", "撞": "zhuàng",
+            "藉": "jiè", "口": "kǒu", "辯": "biàn", "解": "jiě", "氣": "qì",
+            "甩": "shuǎi", "門": "mén", "而": "ér", "冷": "lěng", "漠": "mò", "理": "lǐ",
+            "睬": "cǎi", "準": "zhǔn", "備": "bèi", "和": "hé", "朋": "péng", "友": "yǒu",
+            "玩": "wán", "耍": "shuǎ", "前": "qián", "最": "zuì", "重": "zhòng",
+            "要": "yào", "哪": "nǎ", "件": "jiàn", "向": "xiàng", "稟": "bǐng",
+            "報": "bào", "安": "ān", "偷": "tōu",
+            "溜": "liū", "免": "miǎn", "得": "de", "被": "bèi", "管": "guǎn", "束": "shù",
+            "晚": "wǎn", "上": "shàng", "才": "cái", "打": "dǎ", "電": "diàn", "話": "huà",
+            "直": "zhí", "睡": "shuì", "覺": "jiào", "跟": "gēn", "招": "zhāo",
+            "發": "fā", "現": "xiàn", "決": "jué", "定": "dìng",
+            "健": "jiàn", "康": "kāng", "利": "lì", "勸": "quàn", "導": "dǎo", "態": "tài",
+            "度": "dù", "顏": "yán", "語": "yǔ",
+            "委": "wěi", "婉": "wǎn", "指": "zhǐ", "責": "zé", "固": "gù", "執": "zhí",
+            "己": "jǐ", "悶": "mèn", "戰": "zhàn", "外": "wài", "人": "rén",
+            "批": "pī", "評": "píng", "長": "zhǎng", "輩": "bèi",
+            "受": "shòu", "到": "dào", "意": "yì", "外": "wài",
+            "護": "hù", "體": "tǐ", "讓": "ràng", "擔": "dān",
+            "作": "zuò", "都": "dōu", "關": "关", "只": "zhǐ", "顧": "gù", "熬": "áo",
+            "弄": "nòng", "壞": "huài", "家": "jiā", "裡": "lǐ", "貴": "guì", "品": "pǐn",
+            "未": "wèi", "同": "tóng", "納": "nà", "走": "zǒu", "或": "huò",
+            "隱": "yǐn", "瞞": "mán", "處": "chǔ", "置": "zhì",
+            "徵": "zhēng", "許": "xǔ", "可": "kě",
+            "起": "qǐ", "來": "lái", "便": "biàn",
+            "送": "sòng", "給": "gěi", "別": "bié", "用": "yòng", "掉": "diào",
+            "丟": "diū", "棄": "qì", "病": "bìng", "臥": "wò", "休": "xiū",
+            "息": "xī", "細": "xì", "照": "zhào", "顧": "gù", "關": "guān", "懷": "huái",
+            "暖": "nuǎn", "樂": "lè", "嫌": "xián", "麻": "má", "躲": "duǒ",
+            "餵": "wèi", "藥": "yào", "早": "zǎo", "主": "zhǔ", "候": "hòu",
+            "各": "gè", "相": "xiāng", "會": "huì", "奇": "qí", "怪": "guài",
+            "傳": "chuán", "訊": "xùn", "貼": "tiē", "圖": "tú", "就": "jiù",
+            "吃": "chī", "清": "qīng", "淡": "dàn", "蔬": "shū", "菜": "cài",
+            "避": "bì", "討": "tǎo", "厭": "yàn", "食": "shí", "全": "quán",
+            "按": "àn", "味": "wèi", "買": "mǎi", "毫": "háo", "意": "yì",
+            // 系統狀態字詞
+            "接": "jiē", "龍": "lóng", "妙": "miào", "哉": "zāi",
+            "善": "shàn", "了": "le", "惜": "xī",
+            "品": "pǐn", "聖": "shèng", "訓": "xùn",
+            "值": "zhí", "含": "hán", "歸": "guī", "零": "líng",
+            "成": "chéng", "查": "chá", "繼": "jì", "續": "xù",
+            "狀": "zhuàng", "元": "yuán", "眼": "yǎn", "探": "tàn",
+            "花": "花", "舉": "jǔ", "秀": "xiù", "童": "tóng",
+            "獨": "dú", "佔": "zhàn", "鰲": "áo", "頭": "tóu",
+            "數": "shù", "通": "tōng", "曉": "xiǎo", "銘": "míng",
+            "記": "jì", "堪": "kān", "楷": "kǎi", "模": "mó",
+            "德": "dé", "兼": "jiān", "流": "liú", "僅": "jǐn",
+            "差": "chà", "釐": "lí", "登": "dēng", "峰": "fēng",
+            "造": "zào", "極": "jí", "學": "xué", "義": "yì",
+            "君": "jun", "風": "fēng", "基": "jī", "礎": "chǔ",
+            "尚": "shàng", "穩": "wěn", "能": "néng", "層": "céng",
+            "樓": "lóu", "初": "chū", "牆": "qiáng", "疏": "shū",
+            "漏": "lòu", "勤": "qín", "加": "jiā", "廊": "láng",
+            "現": "xiàn", "主": "zhǔ", "持": "chí", "產": "chǎn",
+            "投": "tóu", "影": "yǐng", "二": "èr", "維": "wéi",
+            "邀": "yāo", "歡": "huān", "迎": "yíng", "參": "cān",
+            "網": "wǎng", "址": "zhǐ", "複": "fù", "制": "zhì",
+            "送": "sòng", "鎖": "suǒ", "倒": "dào", "秒": "miǎo",
+            "公": "gōng", "佈": "bù", "析": "xī", "排": "pái",
+            "行": "háng", "次": "cì", "分": "fēn", "線": "xiàn",
+            "失": "shī", "敗": "bài", "手": "shǒu", "機": "jī",
+            "相": "xiāng", "對": "duì", "欄": "lán", "窗": "chuāng"
+        };
+
+        /**
+         * 自動為中文句子加上 <ruby>字<rt>pīnyīn</rt></ruby> 標籤
+         * @param {string} text - 原始中文文字
+         * @returns {string} 帶有 Ruby 拼音標註的 HTML 字串
+         */
+        function toRubyHTML(text) {
+            if (!text) return "";
+            let result = "";
+            for (const char of text) {
+                if (PINYIN_DICT[char]) {
+                    result += `<ruby><rb>${char}</rb><rt>${PINYIN_DICT[char]}</rt></ruby>`;
+                } else {
+                    result += char;
+                }
+            }
+            return result;
+        }
+
+        /**
+         * 專屬《弟子規・入則孝》題庫資料
+         */
+        const RU_ZE_XIAO_BANK = {
+            classic: [
+                {
+                    chapter: "入則孝・應對之禮",
+                    promptPrefix: "父母呼，應勿緩；父母命，",
+                    answer: "行勿懶",
+                    options: ["行勿懶", "須敬聽", "須順承", "力為具"],
+                    fullVerse: "父母呼，應勿緩；父母命，行勿懶。",
+                    explanationIndo: "Ketika orang tua memanggil, segeralah menyahut dan jangan menunda-nunda; ketika orang tua memberi perintah, kerjakanlah dengan sigap dan jangan bermalas-malasan."
+                },
+                {
+                    chapter: "入則孝・受教之禮",
+                    promptPrefix: "父母教，須敬聽；父母責，",
+                    answer: "須順承",
+                    options: ["須順承", "行勿懶", "勿擅為", "怡吾色"],
+                    fullVerse: "父母教，須敬聽；父母責，須順承。",
+                    explanationIndo: "Ketika orang tua memberikan nasihat, dengarkanlah dengan penuh hormat; ketika orang tua menegur, terimalah dengan patuh dan lapang dada tanpa membantah."
+                },
+                {
+                    chapter: "入則孝・晨昏定省",
+                    promptPrefix: "冬則溫，夏則凊；晨則省，",
+                    answer: "昏則定",
+                    options: ["昏則定", "反必面", "業無變", "不離床"],
+                    fullVerse: "冬則溫，夏則凊；晨則省，昏則定。",
+                    explanationIndo: "Di musim dingin pastikan orang tua merasa hangat, dan di musim panas sejuk. Di pagi hari berilah salam sapa, dan di malam hari pastikan mereka beristirahat dengan tenang."
+                },
+                {
+                    chapter: "入則孝・出告反面",
+                    promptPrefix: "出必告，反必面；居有常，",
+                    answer: "業無變",
+                    options: ["業無變", "昏則定", "子道虧", "親心傷"],
+                    fullVerse: "出必告，反必面；居有常，業無變。",
+                    explanationIndo: "Saat hendak keluar rumah wajib berpamitan memberi tahu tujuan, dan saat pulang wajib menemui orang tua. Hidup sehari-hari harus teratur agar orang tua tidak khawatir."
+                },
+                {
+                    chapter: "入則孝・勿擅為私藏",
+                    promptPrefix: "事雖小，勿擅為；苟擅為，",
+                    answer: "子道虧",
+                    options: ["子道虧", "親心傷", "貽親憂", "貽親羞"],
+                    fullVerse: "事雖小，勿擅為；苟擅為，子道虧。",
+                    explanationIndo: "Meskipun suatu urusan tampak kecil, jangan bertindak semaunya sendiri tanpa izin orang tua, agar kewajiban bakti tidak tercela."
+                },
+                {
+                    chapter: "入則孝・物勿私藏",
+                    promptPrefix: "物雖小，勿私藏；苟私藏，",
+                    answer: "親心傷",
+                    options: ["親心傷", "子道虧", "貽親憂", "貽親羞"],
+                    fullVerse: "物雖小，勿私藏；苟私藏，親心傷。",
+                    explanationIndo: "Meskipun suatu benda bernilai kecil, jangan menyembunyikannya secara diam-diam untuk diri sendiri, karena ketidakjujuran akan melukai hati orang tua."
+                },
+                {
+                    chapter: "入則孝・體貼親心",
+                    promptPrefix: "親所好，力為具；親所惡，",
+                    answer: "謹為去",
+                    options: ["謹為去", "須順承", "力為具", "謹為去"],
+                    fullVerse: "親所好，力為具；親所惡，謹為去。",
+                    explanationIndo: "Apa yang disukai orang tua, berusahalah menyediakannya; apa yang tidak disukai, berhati-hatilah untuk menjauhkannya."
+                },
+                {
+                    chapter: "入則孝・愛護身心",
+                    promptPrefix: "身有傷，貽親憂；德有傷，",
+                    answer: "貽親羞",
+                    options: ["貽親羞", "親心傷", "子道虧", "孝方賢"],
+                    fullVerse: "身有傷，貽親憂；德有傷，貽親羞。",
+                    explanationIndo: "Jika tubuh kita terluka karena ceroboh, hal itu membuat orang tua cemas; jika moral kita rusak, hal itu membuat orang tua merasa malu."
+                },
+                {
+                    chapter: "入則孝・逆境盡孝",
+                    promptPrefix: "親愛我，孝何難；親憎我，",
+                    answer: "孝方賢",
+                    options: ["孝方賢", "悅復諫", "撻無怨", "如事生"],
+                    fullVerse: "親愛我，孝何難；親憎我，孝方賢。",
+                    explanationIndo: "Ketika orang tua menyayangi, berbakti itu mudah; namun ketika orang tua sedang marah atau kurang berkenan, tetap berbakti menunjukkan budi pekerti mulia."
+                },
+                {
+                    chapter: "入則孝・婉言勸諫",
+                    promptPrefix: "親有過，諫使更；怡吾色，",
+                    answer: "柔吾聲",
+                    options: ["柔吾聲", "悅復諫", "撻無怨", "須敬聽"],
+                    fullVerse: "親有過，諫使更；怡吾色，柔吾聲。",
+                    explanationIndo: "Apabila orang tua melakukan kekeliruan, ingatkanlah dengan wajah ramah dan suara yang lembut penuh hormat."
+                },
+                {
+                    chapter: "入則孝・侍疾奉湯",
+                    promptPrefix: "親有疾，藥先嘗；晝夜侍，",
+                    answer: "不離床",
+                    options: ["不離床", "常悲咽", "酒肉絕", "如事生"],
+                    fullVerse: "親有疾，藥先嘗；晝夜侍，不離床。",
+                    explanationIndo: "Ketika orang tua sakit, cicipilah obatnya terlebih dahulu dan rawatlah siang malam tanpa meninggalkan sisi tempat tidur."
+                },
+                {
+                    chapter: "入則孝・追思盡誠",
+                    promptPrefix: "喪盡禮，祭盡誠；事死者，",
+                    answer: "如事生",
+                    options: ["如事生", "不離床", "常悲咽", "酒肉絕"],
+                    fullVerse: "喪盡禮，祭盡誠；事死者，如事生。",
+                    explanationIndo: "Dalam upacara pemakaman jalankan tata krama dengan baik, dan saat bersembahyang lakukan dengan tulus seperti melayani semasa hidup."
+                }
+            ],
+            scenario: [
+                {
+                    chapter: "入則孝・父母呼應",
+                    scenarioTitle: "書房聞喚",
+                    situation: "你在房間裡看書，聽到媽媽叫你的名字，該怎麼做？",
+                    answer: "立刻回答並走過去詢問",
+                    options: [
+                        "立刻回答並走過去詢問",
+                        "假裝沒聽見等看完再說",
+                        "不耐煩地大喊我很忙",
+                        "坐著不動隨口應一聲"
+                    ],
+                    fullVerse: "父母呼，應勿緩；父母命，行勿懶。",
+                    explanationIndo: "Sesuai ajaran 'Fu Mu Hu, Ying Wu Huan', saat orang tua memanggil, segeralah menyahut dan menghampiri mereka."
+                },
+                {
+                    chapter: "入則孝・受教順承",
+                    scenarioTitle: "父母指正功課",
+                    situation: "父母指出你功課上的錯誤時，應該抱持什麼態度？",
+                    answer: "恭敬聆聽並虛心改進",
+                    options: [
+                        "恭敬聆聽並虛心改進",
+                        "大聲頂撞找藉口辯解",
+                        "生氣甩門而去不理睬",
+                        "表面答應心裡卻不服氣"
+                    ],
+                    fullVerse: "父母教，須敬聽；父母責，須順承。",
+                    explanationIndo: "Nasihat dan teguran orang tua bertujuan demi kebaikan kita, sehingga harus didengarkan dengan hormat dan diperbaiki."
+                },
+                {
+                    chapter: "入則孝・出告反面",
+                    scenarioTitle: "出門與回家",
+                    situation: "準備和朋友出門玩耍，出門前與回家後最重要的禮節是什麼？",
+                    answer: "先向父母稟告，回家後再向父母報平安",
+                    options: [
+                        "先向父母稟告，回家後再向父母報平安",
+                        "偷偷溜出門免得被父母管束",
+                        "回家後直接進房間睡覺不打招呼",
+                        "出門不說一聲，晚上才傳訊息"
+                    ],
+                    fullVerse: "出必告，反必面；居有常，業無變。",
+                    explanationIndo: "'Chu Bi Gao, Fan Bi Mian' berarti wajib berpamitan dan menemui orang tua saat kembali, agar mereka tidak cemas."
+                },
+                {
+                    chapter: "入則孝・怡色柔聲",
+                    scenarioTitle: "勸諫父母",
+                    situation: "發現父母做了一個對健康不利的決定，應該如何勸導？",
+                    answer: "態度和顏悅色、語氣委婉說明",
+                    options: [
+                        "態度和顏悅色、語氣委婉說明",
+                        "大聲指責父母固執己見",
+                        "生悶氣用冷戰表達不滿",
+                        "在外人面前批評長輩"
+                    ],
+                    fullVerse: "親有過，諫使更；怡吾色，柔吾聲。",
+                    explanationIndo: "Saat mengingatkan orang tua yang keliru, kita wajib menjaga raut wajah tetap ramah dan nada suara yang lembut."
+                },
+                {
+                    chapter: "入則孝・愛護身體",
+                    scenarioTitle: "愛護身心",
+                    situation: "為什麼《弟子規》提醒我們不要讓自己受到意外傷害？",
+                    answer: "因為身體受傷會讓父母非常擔憂",
+                    options: [
+                        "Because body injuries make parents worried",
+                        "Because injuries prevent playing outside",
+                        "Because dangerous actions are unrelated to parents",
+                        "Because staying up late is completely fine"
+                    ].map(x => x), // Will override with Chinese options below properly
+                    // Correct options array for Chinese below:
+                    options: [
+                        "因為身體受傷會讓父母非常擔憂",
+                        "因為受傷了就不能出去玩樂",
+                        "因為做危險動作很帥氣無關父母",
+                        "因為熬夜弄壞身體也沒關係"
+                    ],
+                    fullVerse: "身有傷，貽親憂；德有傷，貽親羞。",
+                    explanationIndo: "Menjaga kesehatan dan keselamatan diri adalah wujud nyata bakti agar orang tua tidak bersedih dan khawatir."
+                },
+                {
+                    chapter: "入則孝・物勿私藏",
+                    scenarioTitle: "家裡的貴重物品",
+                    situation: "看到家裡有喜歡的物品想要使用或帶走，應該怎麼做？",
+                    answer: "必須先徵得父母許可",
+                    options: [
+                        "必須先徵得父母許可",
+                        "未經同意直接拿走或隱瞞",
+                        "藏起來不讓父母知道",
+                        "隨便送給別人也不說一聲"
+                    ],
+                    fullVerse: "事雖小，勿擅為；苟擅為，子道虧。物雖小，勿私藏；苟私藏，親心傷。",
+                    explanationIndo: "Sekecil apa pun barang di rumah, jangan mengambil atau menyembunyikannya tanpa izin orang tua."
+                },
+                {
+                    chapter: "入則孝・侍疾奉湯",
+                    scenarioTitle: "父母生病時",
+                    situation: "父母生病臥床休息時，身為子女應該如何盡孝？",
+                    answer: "細心照顧關懷，陪伴在旁",
+                    options: [
+                        "細心照顧關懷，陪伴在旁",
+                        "覺得很麻煩躲在房間玩耍",
+                        "直接出門玩樂不管父母",
+                        "嫌藥苦不幫忙餵藥"
+                    ],
+                    fullVerse: "親有疾，藥先嘗；晝夜侍，不離床。",
+                    explanationIndo: "Saat orang tua sakit, anak harus merawat dengan penuh perhatian dan setia mendampingi di sisi tempat tidur."
+                },
+                {
+                    chapter: "入則孝・晨昏定省",
+                    scenarioTitle: "早晚問安與飲食體貼",
+                    situation: "每天早晨起床與晚上睡覺前，以及準備父母餐食時該怎麼做？",
+                    answer: "主動向父母問安，並準備父母喜愛的食物",
+                    options: [
+                        "主動向父母問安，並準備父母喜愛的食物",
+                        "各過各的互不理睬",
+                        "強迫父母吃他們討厭的食物",
+                        "完全按照自己口味買毫不在意父母好惡"
+                    ],
+                    fullVerse: "晨則省，昏則定。親所好，力為具；親所惡，謹為去。",
+                    explanationIndo: "Rutin menyapa orang tua pagi dan malam, serta memperhatikan kesukaan dan kenyamanan mereka dengan tulus."
+                }
+            ]
+        };
+
+        // 遊戲全域狀態
+        let gameState = {
+            mode: 'classic',
+            questions: [],
+            currentIndex: 0,
+            score: 0,
+            correctCount: 0,
+            streak: 0,
+            maxStreak: 0,
+            wrongRecords: [],
+            answered: false,
+            bgmEnabled: false,
+            sfxEnabled: true
+        };
+
+        // ==================== Web Audio API 古箏／古琴五聲音階 BGM 與音效引擎 ====================
+        let audioCtx = null;
+        let bgmInterval = null;
+        let bgmStep = 0;
+
+        const PENTATONIC_MELODY = [
+            261.63, 329.63, 392.00, 440.00, 523.25, 440.00, 392.00, 329.63,
+            293.66, 392.00, 440.00, 523.25, 587.33, 523.25, 440.00, 392.00,
+            329.63, 392.00, 523.25, 659.25, 587.33, 523.25, 440.00, 392.00,
+            293.66, 329.63, 392.00, 329.63, 261.63, 196.00, 261.63, 0
+        ];
+
+        function ensureAudioContext() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContextClass();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function pluckGuzheng(freq, duration = 1.6, volume = 0.08) {
+            if (!audioCtx || freq <= 0) return;
+            const now = audioCtx.currentTime;
+
+            const osc1 = audioCtx.createOscillator();
+            const osc2 = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            const filter = audioCtx.createBiquadFilter();
+
+            osc1.type = 'triangle';
+            osc1.frequency.setValueAtTime(freq, now);
+
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(freq * 2, now);
+
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(1400, now);
+            filter.frequency.exponentialRampToValueAtTime(320, now + duration);
+
+            gainNode.gain.setValueAtTime(0.001, now);
+            gainNode.gain.linearRampToValueAtTime(volume, now + 0.025);
+            gainNode.gain.exponentialRampToValueAtTime(0.0008, now + duration);
+
+            osc1.connect(filter);
+            osc2.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            osc1.start(now);
+            osc2.start(now);
+            osc1.stop(now + duration);
+            osc2.stop(now + duration);
+        }
+
+        function startBGM() {
+            ensureAudioContext();
+            if (bgmInterval) return;
+            gameState.bgmEnabled = true;
+            updateAudioButtonsUI();
+
+            pluckGuzheng(PENTATONIC_MELODY[bgmStep % PENTATONIC_MELODY.length], 1.8, 0.065);
+            bgmStep++;
+
+            bgmInterval = setInterval(() => {
+                if (!gameState.bgmEnabled) return;
+                const note = PENTATONIC_MELODY[bgmStep % PENTATONIC_MELODY.length];
+                pluckGuzheng(note, 1.8, 0.065);
+                bgmStep++;
+            }, 750);
+        }
+
+        function stopBGM() {
+            gameState.bgmEnabled = false;
+            if (bgmInterval) {
+                clearInterval(bgmInterval);
+                bgmInterval = null;
+            }
+            updateAudioButtonsUI();
+        }
+
+        function toggleBGM() {
+            if (gameState.bgmEnabled) {
+                stopBGM();
+            } else {
+                startBGM();
+            }
+        }
+
+        function toggleSFX() {
+            gameState.sfxEnabled = !gameState.sfxEnabled;
+            updateAudioButtonsUI();
+            if (gameState.sfxEnabled) {
+                playSFX('click');
+            }
+        }
+
+        function updateAudioButtonsUI() {
+            const bgmIcon = document.getElementById('bgmIcon');
+            const bgmLabel = document.getElementById('bgmLabel');
+            if (gameState.bgmEnabled) {
+                bgmIcon.textContent = '🎶';
+                bgmLabel.innerHTML = toRubyHTML('琴樂：開');
+            } else {
+                bgmIcon.textContent = '🔇';
+                bgmLabel.innerHTML = toRubyHTML('琴樂：關');
+            }
+
+            const sfxIcon = document.getElementById('sfxIcon');
+            const sfxLabel = document.getElementById('sfxLabel');
+            if (gameState.sfxEnabled) {
+                sfxIcon.textContent = '🔔';
+                sfxLabel.innerHTML = toRubyHTML('音效：開');
+            } else {
+                sfxIcon.textContent = '🔕';
+                sfxLabel.innerHTML = toRubyHTML('音效：關');
+            }
+        }
+
+        function playSFX(type) {
+            if (!gameState.sfxEnabled) return;
+            ensureAudioContext();
+
+            if (type === 'click') {
+                pluckGuzheng(392.00, 0.4, 0.09);
+            } else if (type === 'correct') {
+                pluckGuzheng(261.63, 0.7, 0.11);
+                setTimeout(() => pluckGuzheng(329.63, 0.7, 0.11), 90);
+                setTimeout(() => pluckGuzheng(392.00, 0.8, 0.11), 180);
+                setTimeout(() => pluckGuzheng(523.25, 1.2, 0.13), 270);
+            } else if (type === 'wrong') {
+                pluckGuzheng(196.00, 0.6, 0.10);
+                setTimeout(() => pluckGuzheng(164.81, 0.8, 0.10), 160);
+            } else if (type === 'finish') {
+                pluckGuzheng(261.63, 1.5, 0.11);
+                setTimeout(() => pluckGuzheng(329.63, 1.5, 0.11), 120);
+                setTimeout(() => pluckGuzheng(392.00, 1.5, 0.11), 240);
+                setTimeout(() => pluckGuzheng(523.25, 2.0, 0.14), 360);
+            }
+        }
+
+        function shuffleArray(arr) {
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        // ==================== 單人模式邏輯 ====================
+        function startSoloGame(mode) {
+            if (!gameState.bgmEnabled) {
+                startBGM();
+            }
+            playSFX('click');
+
+            gameState.mode = mode;
+            gameState.currentIndex = 0;
+            gameState.score = 0;
+            gameState.correctCount = 0;
+            gameState.streak = 0;
+            gameState.maxStreak = 0;
+            gameState.wrongRecords = [];
+            gameState.answered = false;
+
+            const modeBadge = document.getElementById('modeBadge');
+            if (mode === 'classic') {
+                gameState.questions = shuffleArray(RU_ZE_XIAO_BANK.classic)
+                    .slice(0, 8)
+                    .map(q => ({ ...q, qType: 'classic' }));
+                modeBadge.innerHTML = toRubyHTML('經典接龍');
+            } else if (mode === 'scenario') {
+                gameState.questions = shuffleArray(RU_ZE_XIAO_BANK.scenario)
+                    .slice(0, 8)
+                    .map(q => ({ ...q, qType: 'scenario' }));
+                modeBadge.innerHTML = toRubyHTML('生活孝道');
+            } else {
+                const cPart = shuffleArray(RU_ZE_XIAO_BANK.classic).slice(0, 4).map(q => ({ ...q, qType: 'classic' }));
+                const sPart = shuffleArray(RU_ZE_XIAO_BANK.scenario).slice(0, 4).map(q => ({ ...q, qType: 'scenario' }));
+                gameState.questions = shuffleArray([...cPart, ...sPart]);
+                modeBadge.innerHTML = toRubyHTML('入則孝殿試');
+            }
+
+            document.getElementById('menuScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            document.getElementById('homeBtn').classList.remove('hidden');
+
+            document.getElementById('totalQNum').textContent = gameState.questions.length;
+            updateStatsUI();
+            renderSoloQuestion();
+        }
+
+        function returnToMenu() {
+            playSFX('click');
+            if (typeof cleanupMultiplayer === 'function') {
+                cleanupMultiplayer();
+            }
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('multiplayerScreen').classList.add('hidden');
+            document.getElementById('homeBtn').classList.add('hidden');
+            document.getElementById('menuScreen').classList.remove('hidden');
+        }
+
+        function restartCurrentMode() {
+            startSoloGame(gameState.mode);
+        }
+
+        function updateStatsUI() {
+            document.getElementById('scoreDisplay').textContent = gameState.score;
+            const streakBox = document.getElementById('streakBox');
+            if (gameState.streak >= 2) {
+                streakBox.classList.remove('hidden');
+                streakBox.classList.add('flex');
+                document.getElementById('streakCount').textContent = gameState.streak;
+            } else {
+                streakBox.classList.add('hidden');
+                streakBox.classList.remove('flex');
+            }
+        }
+
+        function renderSoloQuestion() {
+            gameState.answered = false;
+            const q = gameState.questions[gameState.currentIndex];
+            const total = gameState.questions.length;
+
+            document.getElementById('currentQNum').textContent = gameState.currentIndex + 1;
+            const progressPct = ((gameState.currentIndex) / total) * 100;
+            document.getElementById('progressBar').style.width = `${Math.max(10, progressPct)}%`;
+
+            document.getElementById('chapterTag').innerHTML = `《${toRubyHTML('弟子規')}》・${toRubyHTML(q.chapter)}`;
+
+            document.getElementById('feedbackPanel').classList.add('hidden');
+            document.getElementById('nextBtnContainer').classList.add('hidden');
+
+            const promptEl = document.getElementById('questionPrompt');
+            if (q.qType === 'classic') {
+                promptEl.innerHTML = `
+                    <div class="text-xs sm:text-sm text-[#7a6e5d] mb-2 ruby-line">
+                        ${toRubyHTML('請接出正確的下一句經文')}
+                    </div>
+                    <div class="text-2xl sm:text-3xl font-bold text-[#26221e] tracking-wider ruby-line">
+                        ${toRubyHTML(q.promptPrefix)}<span id="blankSlot" class="inline-block border-b-2 border-[#b8332a] text-[#b8332a] px-3 mx-1 min-w-[4.5em]">______</span>。
+                    </div>
+                `;
+            } else {
+                promptEl.innerHTML = `
+                    <div class="inline-block text-xs sm:text-sm font-bold text-[#b8332a] bg-[#fae8e6] px-3 py-1 rounded mb-3 ruby-line">
+                        【${toRubyHTML('情境')}】${toRubyHTML(q.scenarioTitle)}
+                    </div>
+                    <p class="text-lg sm:text-xl font-bold text-[#26221e] text-left sm:text-center ruby-line">
+                        ${toRubyHTML(q.situation)}
+                    </p>
+                `;
+            }
+
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            const shuffledOptions = shuffleArray(q.options);
+            const labels = ['甲', '乙', '丙', '丁'];
+
+            if (q.qType === 'scenario') {
+                optionsContainer.className = 'grid grid-cols-1 gap-3 mb-6';
+            } else {
+                optionsContainer.className = 'grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6';
+            }
+
+            shuffledOptions.forEach((optText, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn rounded-xl p-4 text-left flex items-center gap-3 cursor-pointer';
+                btn.dataset.rawText = optText;
+                btn.innerHTML = `
+                    <span class="w-8 h-8 rounded-full border border-[#cbbba0] bg-[#f5efe2] text-[#5c5346] font-bold text-xs flex items-center justify-center shrink-0">
+                        ${labels[idx]}
+                    </span>
+                    <span class="font-bold text-base sm:text-lg text-[#26221e] ruby-line">${toRubyHTML(optText)}</span>
+                `;
+                btn.onclick = () => handleSoloAnswer(optText, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function handleSoloAnswer(selectedText, clickedBtn) {
+            if (gameState.answered) return;
+            gameState.answered = true;
+
+            const q = gameState.questions[gameState.currentIndex];
+            const isCorrect = (selectedText === q.answer);
+            const allBtns = document.getElementById('optionsContainer').querySelectorAll('button');
+
+            allBtns.forEach(btn => {
+                btn.disabled = true;
+                const rawText = btn.dataset.rawText;
+                if (rawText === q.answer) {
+                    btn.classList.add('option-correct');
+                } else if (btn === clickedBtn && !isCorrect) {
+                    btn.classList.add('option-wrong');
+                }
+            });
+
+            if (q.qType === 'classic') {
+                const blankSlot = document.getElementById('blankSlot');
+                if (blankSlot) {
+                    blankSlot.innerHTML = toRubyHTML(q.answer);
+                    blankSlot.className = isCorrect
+                        ? 'inline-block border-b-2 border-[#3b6e5c] text-[#3b6e5c] px-2 mx-1 font-black'
+                        : 'inline-block border-b-2 border-[#b8332a] text-[#b8332a] px-2 mx-1 font-black';
+                }
+            }
+
+            const feedbackPanel = document.getElementById('feedbackPanel');
+            const feedbackIcon = document.getElementById('feedbackIcon');
+            const feedbackTitle = document.getElementById('feedbackTitle');
+            const pointsBadge = document.getElementById('pointsEarnedBadge');
+            const feedbackIndoBox = document.getElementById('feedbackIndoBox');
+
+            if (isCorrect) {
+                playSFX('correct');
+                gameState.correctCount++;
+                gameState.streak++;
+                if (gameState.streak > gameState.maxStreak) {
+                    gameState.maxStreak = gameState.streak;
+                }
+
+                const bonus = (gameState.streak - 1) * 20;
+                const earned = 100 + bonus;
+                gameState.score += earned;
+
+                feedbackPanel.className = 'rounded-xl p-4 sm:p-5 mb-5 border-2 border-[#3b6e5c] bg-[#eef7f3] fade-in';
+                feedbackIcon.textContent = '✨';
+                const streakTitle = gameState.streak >= 3
+                    ? `${toRubyHTML('妙哉！連勝')} ${gameState.streak} ${toRubyHTML('題！')} (Benar!)`
+                    : `${toRubyHTML('善哉！答對了！')} (Benar sekali!)`;
+                feedbackTitle.innerHTML = streakTitle;
+                feedbackTitle.className = 'font-bold text-base sm:text-lg text-[#244f40] ruby-line';
+
+                pointsBadge.innerHTML = bonus > 0
+                    ? `+${earned} ${toRubyHTML('文采值')}（${toRubyHTML('含連勝')} +${bonus}）`
+                    : `+${earned} ${toRubyHTML('文采值')}`;
+                pointsBadge.className = 'text-xs font-bold px-2.5 py-1 rounded bg-[#d5ebe1] text-[#244f40] ruby-line';
+
+                feedbackIndoBox.className = 'mt-2.5 p-3.5 rounded-lg bg-white/90 border-l-4 border-[#3b6e5c] shadow-sm';
+            } else {
+                playSFX('wrong');
+                gameState.streak = 0;
+
+                gameState.wrongRecords.push({
+                    chapter: q.chapter,
+                    questionText: q.qType === 'classic' ? `${q.promptPrefix}______` : q.situation,
+                    yourAnswer: selectedText,
+                    correctAnswer: q.answer,
+                    fullVerse: q.fullVerse,
+                    explanationIndo: q.explanationIndo
+                });
+
+                feedbackPanel.className = 'rounded-xl p-4 sm:p-5 mb-5 border-2 border-[#b8332a] bg-[#fdf1f0] fade-in';
+                feedbackIcon.textContent = '📜';
+                feedbackTitle.innerHTML = `${toRubyHTML('惜哉！再細品聖訓')} (Kurang tepat, mari pelajari!)`;
+                feedbackTitle.className = 'font-bold text-base sm:text-lg text-[#8f221b] ruby-line';
+
+                pointsBadge.innerHTML = toRubyHTML('連勝歸零');
+                pointsBadge.className = 'text-xs font-bold px-2.5 py-1 rounded bg-[#f7dad7] text-[#8f221b] ruby-line';
+
+                feedbackIndoBox.className = 'mt-2.5 p-3.5 rounded-lg bg-white/90 border-l-4 border-[#b8332a] shadow-sm';
+            }
+
+            document.getElementById('feedbackVerse').innerHTML = `【${toRubyHTML('聖訓')}】${toRubyHTML(q.fullVerse)}`;
+            document.getElementById('feedbackIndoText').textContent = q.explanationIndo;
+
+            updateStatsUI();
+
+            const nextBtn = document.getElementById('nextBtn');
+            if (gameState.currentIndex + 1 >= gameState.questions.length) {
+                nextBtn.innerHTML = `${toRubyHTML('完成考核・查看放榜')} →`;
+                document.getElementById('progressBar').style.width = '100%';
+            } else {
+                nextBtn.innerHTML = `${toRubyHTML('繼續下一題')} →`;
+            }
+            document.getElementById('nextBtnContainer').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            playSFX('click');
+            gameState.currentIndex++;
+            if (gameState.currentIndex < gameState.questions.length) {
+                renderSoloQuestion();
+            } else {
+                showSoloResults();
+            }
+        }
+
+        function showSoloResults() {
+            playSFX('finish');
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+
+            const total = gameState.questions.length;
+            const accuracyRate = gameState.correctCount / total;
+
+            let rank = '童生';
+            let comment = '初入書院門牆，勤加溫習必有所成！';
+            let commentIndo = 'Langkah awal yang baik! Teruslah berlatih memahami bakti kepada orang tua.';
+
+            if (accuracyRate === 1) {
+                rank = '狀元';
+                comment = '獨佔鰲頭，全數通曉！孝道銘記於心，堪為書院楷模！';
+                commentIndo = 'Sempurna (Zhuang Yuan)! Anda memahami seluruh ajaran berbakti kepada orang tua dengan luar biasa!';
+            } else if (accuracyRate >= 0.85) {
+                rank = '榜眼';
+                comment = '才德兼備，對答如流！僅差毫釐便登峰造極！';
+                commentIndo = 'Sangat Baik (Bang Yan)! Pemahaman Anda tentang ajaran Ru Ze Xiao sudah sangat mendalam.';
+            } else if (accuracyRate >= 0.7) {
+                rank = '舉人';
+                comment = '學有所成，明禮知義！日常處事已具君子之風！';
+                commentIndo = 'Bagus (Ju Ren)! Anda telah menguasai sebagian besar tata krama berbakti dalam kehidupan sehari-hari.';
+            } else if (accuracyRate >= 0.5) {
+                rank = '秀才';
+                comment = '基礎尚穩，多溫習錯題定能更上一層樓！';
+                commentIndo = 'Cukup Baik (Xiu Cai)! Ulangi kembali bagian yang keliru agar semakin mahir.';
+            }
+
+            document.getElementById('rankTitle').innerHTML = toRubyHTML(rank);
+            document.getElementById('rankComment').innerHTML = toRubyHTML(comment);
+            document.getElementById('rankCommentIndo').textContent = commentIndo;
+            document.getElementById('finalScore').textContent = gameState.score;
+            document.getElementById('finalAccuracy').textContent = `${gameState.correctCount} / ${total}`;
+            document.getElementById('finalMaxStreak').textContent = gameState.maxStreak;
+
+            const wrongSection = document.getElementById('wrongReviewSection');
+            const wrongList = document.getElementById('wrongList');
+            wrongList.innerHTML = '';
+
+            if (gameState.wrongRecords.length > 0) {
+                wrongSection.classList.remove('hidden');
+                gameState.wrongRecords.forEach((item, idx) => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-[#faf6ed] border border-[#dfd3be] rounded-xl p-4 text-sm';
+                    card.innerHTML = `
+                        <div class="font-bold text-[#26221e] mb-1.5 ruby-line">
+                            ${idx + 1}. ${toRubyHTML(item.questionText)}
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:flex-wrap gap-x-4 gap-y-1 text-xs sm:text-sm mb-2 ruby-line">
+                            <span class="text-[#b8332a]">✘ ${toRubyHTML('你的選擇')}：${toRubyHTML(item.yourAnswer)}</span>
+                            <span class="text-[#3b6e5c] font-bold">✔ ${toRubyHTML('正確聖訓')}：${toRubyHTML(item.correctAnswer)}</span>
+                        </div>
+                        <div class="text-xs sm:text-sm text-[#26221e] bg-[#f2ead8]/80 p-2.5 rounded ruby-line mb-1.5">
+                            ${toRubyHTML(item.fullVerse)}
+                        </div>
+                        <div class="text-xs text-[#3b6e5c] italic">
+                            🇮🇩 ${item.explanationIndo}
+                        </div>
+                    `;
+                    wrongList.appendChild(card);
+                });
+            } else {
+                wrongSection.classList.add('hidden');
+            }
+        }
+    </script>
+
+    <!-- ==================== Firebase 即時多人掃碼共學引擎 ==================== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // 擴充多人模式常用字拼音
+        Object.assign(PINYIN_DICT, {
+            "主": "zhǔ", "持": "chí", "開": "kāi", "房": "fáng", "產": "chǎn", "生": "shēng",
+            "投": "tóu", "影": "yǐng", "二": "èr", "維": "wéi", "碼": "mǎ", "邀": "yāo",
+            "大": "dà", "家": "jiā", "掃": "sǎo", "同": "tóng", "樂": "lè", "參": "cān",
+            "與": "yù", "者": "zhě", "輸": "shū", "號": "hào", "加": "jiā", "填": "tián",
+            "寫": "xiě", "暱": "nì", "稱": "chēng", "即": "jí", "可": "kě", "賽": "sài",
+            "老": "lǎo", "師": "shī", "學": "xué", "多": "duō", "步": "bù", "共": "gòng",
+            "廳": "tīng", "等": "děng", "待": "dài", "候": "hòu", "員": "yuán", "位": "wèi",
+            "已": "yǐ", "準": "zhǔn", "備": "bèi", "就": "jiù", "緒": "xù", "題": "tí",
+            "型": "xíng", "倒": "dào", "數": "shù", "秒": "miǎo", "公": "gōng", "佈": "bù",
+            "解": "jiě", "析": "xī", "排": "pái", "行": "háng", "榜": "bǎng", "名": "míng",
+            "次": "cì", "分": "fēn", "作": "zuò", "答": "dá", "中": "zhōng", "送": "sòng",
+            "鎖": "suǒ", "定": "dìng", "連": "lián", "線": "xiàn", "失": "shī", "敗": "bài",
+            "重": "chóng", "試": "shì", "請": "qǐng", "手": "shǒu", "機": "jī", "相": "xiāng",
+            "對": "duì", "下": "xià", "方": "fāng", "或": "huò", "網": "wǎng", "址": "zhǐ",
+            "關": "guān", "始": "shǐ", "闖": "chuǎng", "目": "mù", "前": "qián", "無": "wú",
+            "暫": "zàn", "時": "shí", "尚": "shàng", "未": "wèi", "成": "chéng", "功": "gōng"
+        });
+
+        // 初始化 Firebase
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'dizigui-ruzexiao-app';
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+
+        async function initFirebase() {
+            if (db && currentUser) return true;
+            try {
+                if (typeof __firebase_config === 'undefined') {
+                    console.warn("Firebase config not found.");
+                    return false;
+                }
+                const firebaseConfig = JSON.parse(__firebase_config);
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    const cred = await signInWithCustomToken(auth, __initial_auth_token);
+                    currentUser = cred.user;
+                } else {
+                    const cred = await signInAnonymously(auth);
+                    currentUser = cred.user;
+                }
+                return true;
+            } catch (err) {
+                console.error("Firebase init error:", err);
+                return false;
+            }
+        }
+
+        // 多人對戰狀態
+        let mpState = {
+            role: null, // 'host' | 'player'
+            roomCode: '',
+            playerName: '',
+            selectedMode: 'mixed',
+            roomData: null,
+            players: [],
+            unsubRoom: null,
+            unsubPlayers: null,
+            timerInterval: null,
+            timeLeft: 20,
+            localAnsweredQIdx: -1,
+            localSelectedOption: null,
+            localScore: 0,
+            localStreak: 0,
+            localCorrectCount: 0
+        };
+
+        window.cleanupMultiplayer = function () {
+            if (mpState.unsubRoom) { mpState.unsubRoom(); mpState.unsubRoom = null; }
+            if (mpState.unsubPlayers) { mpState.unsubPlayers(); mpState.unsubPlayers = null; }
+            if (mpState.timerInterval) { clearInterval(mpState.timerInterval); mpState.timerInterval = null; }
+            mpState.role = null;
+            mpState.roomCode = '';
+            mpState.roomData = null;
+            mpState.players = [];
+        };
+
+        function showMpToast(zhMsg, indoMsg, isError = false) {
+            const container = document.getElementById('mpContainer');
+            if (!container) return;
+            const existing = document.getElementById('mpToastBanner');
+            if (existing) existing.remove();
+
+            const div = document.createElement('div');
+            div.id = 'mpToastBanner';
+            div.className = `mb-4 p-3 rounded-xl border-2 text-sm font-bold fade-in ${
+                isError ? 'bg-[#fdf1f0] border-[#b8332a] text-[#8f221b]' : 'bg-[#eef7f3] border-[#3b6e5c] text-[#244f40]'
+            }`;
+            div.innerHTML = `
+                <div class="ruby-line">${toRubyHTML(zhMsg)}</div>
+                ${indoMsg ? `<div class="text-xs font-normal mt-0.5 italic">${indoMsg}</div>` : ''}
+            `;
+            container.prepend(div);
+        }
+
+        function showMultiplayerScreen() {
+            document.getElementById('menuScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('multiplayerScreen').classList.remove('hidden');
+            document.getElementById('homeBtn').classList.remove('hidden');
+        }
+
+        function generateRoomCode() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        /**
+         * 完美修復 QR Code 網址：動態抓取當前網站的 origin 與 pathname，
+         * 並自動附加 ?room=XXXXXX，確保在 Netlify、GitHub Pages 或正式伺服器都能 100% 準確掃碼連線！
+         */
+        function getRoomShareUrl(code) {
+            const loc = window.location;
+            const cleanBase = loc.origin + loc.pathname;
+            return `${cleanBase}?room=${code}`;
+        }
+
+        // ==================== 1. 主持開房流程 (Host) ====================
+        window.openHostSetup = async function () {
+            if (!gameState.bgmEnabled) startBGM();
+            playSFX('click');
+            cleanupMultiplayer();
+            showMultiplayerScreen();
+
+            const container = document.getElementById('mpContainer');
+            container.innerHTML = `
+                <div class="text-center py-10 ruby-line">
+                    <div class="text-3xl mb-2 animate-bounce">🏮</div>
+                    <p class="font-bold text-lg text-[#26221e]">${toRubyHTML('正在開啟書院房間與連線')}...</p>
+                    <p class="text-xs text-[#6e6252] mt-1">Menyiapkan ruang kelas bersama...</p>
+                </div>
+            `;
+
+            const ready = await initFirebase();
+            if (!ready || !currentUser) {
+                showMpToast('連線失敗，請檢查網路狀態後重試', 'Gagal terhubung ke server.', true);
+                return;
+            }
+
+            const code = generateRoomCode();
+            mpState.role = 'host';
+            mpState.roomCode = code;
+            mpState.selectedMode = 'mixed';
+
+            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'dizigui_rooms', code);
+            const initialRoom = {
+                roomCode: code,
+                hostId: currentUser.uid,
+                status: 'lobby',
+                mode: 'mixed',
+                currentQIndex: 0,
+                questionsJson: '[]',
+                questionStartTime: 0,
+                createdAt: Date.now()
+            };
+
+            try {
+                await setDoc(roomRef, initialRoom);
+                subscribeToRoom(code);
+            } catch (err) {
+                console.error("Create room error:", err);
+                showMpToast('建立房間失敗，請稍後再試', 'Gagal membuat ruangan.', true);
+            }
+        };
+
+        window.hostSelectMode = async function (mode) {
+            if (mpState.role !== 'host' || !mpState.roomCode || !currentUser) return;
+            playSFX('click');
+            mpState.selectedMode = mode;
+            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'dizigui_rooms', mpState.roomCode);
+            await updateDoc(roomRef, { mode });
+        };
+
+        window.hostStartGame = async function () {
+            if (mpState.role !== 'host' || !mpState.roomCode || !currentUser) return;
+            playSFX('click');
+
+            let questions = [];
+            if (mpState.selectedMode === 'classic') {
+                questions = shuffleArray(RU_ZE_XIAO_BANK.classic).slice(0, 8).map(q => ({ ...q, qType: 'classic' }));
+            } else if (mpState.selectedMode === 'scenario') {
+                questions = shuffleArray(RU_ZE_XIAO_BANK.scenario).slice(0, 8).map(q => ({ ...q, qType: 'scenario' }));
+            } else {
+                const cPart = shuffleArray(RU_ZE_XIAO_BANK.classic).slice(0, 4).map(q => ({ ...q, qType: 'classic' }));
+                const sPart = shuffleArray(RU_ZE_XIAO_BANK.scenario).slice(0, 4).map(q => ({ ...q, qType: 'scenario' }));
+                questions = shuffleArray([...cPart, ...sPart]);
+            }
+
+            questions = questions.map(q => ({
+                ...q,
+                shuffledOptions: shuffleArray(q.options)
+            }));
+
+            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'dizigui_rooms', mpState.roomCode);
+            await updateDoc(roomRef, {
+                status: 'question',
+                currentQIndex: 0,
+                questionsJson: JSON.stringify(questions),
+                questionStartTime: Date.now()
+            });
+        };
+
+        window.hostRevealAnswer = async function () {
+            if (mpState.role !== 'host' || !mpState.roomCode || !currentUser) return;
+            playSFX('correct');
+            if (mpState.timerInterval) { clearInterval(mpState.timerInterval); mpState.timerInterval = null; }
+            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'dizigui_rooms', mpState.roomCode);
+            await updateDoc(roomRef, { status: 'reveal' });
+        };
+
+        window.hostNextStep = async function () {
+            if (mpState.role !== 'host' || !mpState.roomCode || !mpState.roomData || !currentUser) return;
+            playSFX('click');
+            const questions = JSON.parse(mpState.roomData.questionsJson || '[]');
+            const nextIdx = (mpState.roomData.currentQIndex || 0) + 1;
+            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'dizigui_rooms', mpState.roomCode);
+
+            if (nextIdx >= questions.length) {
+                playSFX('finish');
+                await updateDoc(roomRef, { status: 'finished' });
+            } else {
+                await updateDoc(roomRef, {
+                    status: 'question',
+                    currentQIndex: nextIdx,
+                    questionStartTime: Date.now()
+                });
+            }
+        };
+
+        // ==================== 2. 學生/玩家掃碼加入流程 (Player) ====================
+        window.openJoinRoom = function (prefillCode = '') {
+            playSFX('click');
+            cleanupMultiplayer();
+            showMultiplayerScreen();
+
+            const container = document.getElementById('mpContainer');
+            container.innerHTML = `
+                <div class="max-w-md mx-auto text-center py-4 fade-in">
+                    <span class="seal-stamp text-xs sm:text-sm mb-3 ruby-line">
+                        ✍️ ${toRubyHTML('入則孝・書院報到')}
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-[#26221e] mb-2 ruby-line">
+                        ${toRubyHTML('加入共學房間')}
+                    </h2>
+                    <p class="text-xs sm:text-sm text-[#6e6252] mb-6 italic">
+                        Masukkan Kode Ruangan & Nama Anda untuk bergabung
+                    </p>
+
+                    <div class="space-y-4 text-left bg-[#f7f2e6] p-5 rounded-xl border border-[#dfd3be]">
+                        <div>
+                            <label class="block text-sm font-bold text-[#26221e] mb-1 ruby-line">
+                                ${toRubyHTML('六位數房號')} (Room PIN)
+                            </label>
+                            <input id="joinCodeInput" type="text" inputmode="numeric" maxlength="6"
+                                value="${prefillCode}"
+                                placeholder="例如：123456"
+                                class="w-full px-4 py-3 rounded-xl border-2 border-[#cbbba0] bg-white text-center text-2xl font-black tracking-[0.25em] text-[#b8332a] focus:outline-none focus:border-[#b8332a]" />
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-[#26221e] mb-1 ruby-line">
+                                ${toRubyHTML('你的書院暱稱')} (Nama Pemain)
+                            </label>
+                            <input id="joinNameInput" type="text" maxlength="14"
+                                placeholder="請輸入名字 / Nama..."
+                                class="w-full px-4 py-3 rounded-xl border-2 border-[#cbbba0] bg-white text-base font-bold text-[#26221e] focus:outline-none focus:border-[#3b6e5c]" />
+                        </div>
+
+                        <button onclick="submitJoinRoom()" class="btn-cinnabar w-full py-3.5 rounded-xl font-bold text-base sm:text-lg cursor-pointer mt-2 ruby-line">
+                            ${toRubyHTML('進入書院大廳')} →
+                        </button>
+                    </div>
+                </div>
+            `;
+        };
+
+        window.submitJoinRoom = async function () {
+            if (!gameState.bgmEnabled) startBGM();
+            playSFX('click');
+
+            const codeInput = document.getElementById('joinCodeInput');
+            const nameInput = document.getElementById('joinNameInput');
+            const code = (codeInput?.value || '').trim();
+            const name = (nameInput?.value || '').trim();
+
+            if (!/^\d{6}$/.test(code)) {
+                showMpToast('請輸入正確的六位數房號', 'Masukkan 6 digit kode ruangan yang valid.', true);
+                return;
+            }
+            if (!name) {
+                showMpToast('請輸入你的暱稱', 'Silakan masukkan nama panggilan Anda.', true);
+                return;
+            }
+
+            const ready = await initFirebase();
+            if (!ready || !currentUser) {
+                showMpToast('連線失敗，請稍後重試', 'Gagal terhubung ke server.', true);
+                return;
+            }
+
+            try {
+                const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'dizigui_rooms', code);
+                const roomSnap = await getDoc(roomRef);
+                if (!roomSnap.exists()) {
+                    showMpToast('找不到此房號，請確認是否輸入正確', 'Ruangan tidak ditemukan. Periksa kembali kode ruangan.', true);
+                    return;
+                }
+
+                mpState.role = 'player';
+                mpState.roomCode = code;
+                mpState.playerName = name;
+                mpState.localAnsweredQIdx = -1;
+                mpState.localSelectedOption = null;
+                mpState.localScore = 0;
+                mpState.localStreak = 0;
+                mpState.localCorrectCount = 0;
+
+                const playerRef = doc(db, 'artifacts', appId, 'public', 'data', `dizigui_players_${code}`, currentUser.uid);
+                await setDoc(playerRef, {
+                    uid: currentUser.uid,
+                    name: name,
+                    score: 0,
+                    streak: 0,
+                    correctCount: 0,
+                    answeredQIndex: -1,
+                    lastAnswer: '',
+                    lastCorrect: false,
+                    joinedAt: Date.now()
+                });
+
+                subscribeToRoom(code);
+            } catch (err) {
+                console.error("Join room error:", err);
+                showMpToast('加入房間時發生錯誤', 'Terjadi kesalahan saat bergabung.', true);
+            }
+        };
+
+        window.playerSubmitAnswer = async function (selectedText) {
+            if (mpState.role !== 'player' || !mpState.roomData || !currentUser) return;
+            const qIdx = mpState.roomData.currentQIndex || 0;
+            if (mpState.localAnsweredQIdx === qIdx) return;
+
+            const questions = JSON.parse(mpState.roomData.questionsJson || '[]');
+            const q = questions[qIdx];
+            if (!q) return;
+
+            mpState.localAnsweredQIdx = qIdx;
+            mpState.localSelectedOption = selectedText;
+
+            const isCorrect = (selectedText === q.answer);
+            let earned = 0;
+            if (isCorrect) {
+                playSFX('correct');
+                mpState.localCorrectCount++;
+                mpState.localStreak++;
+                const elapsedSec = Math.max(0, (Date.now() - (mpState.roomData.questionStartTime || Date.now())) / 1000);
+                const speedBonus = Math.max(0, Math.round((20 - elapsedSec) * 2));
+                const streakBonus = (mpState.localStreak - 1) * 15;
+                earned = 100 + speedBonus + streakBonus;
+                mpState.localScore += earned;
+            } else {
+                playSFX('wrong');
+                mpState.localStreak = 0;
+            }
+
+            renderMultiplayerView();
+
+            try {
+                const playerRef = doc(db, 'artifacts', appId, 'public', 'data', `dizigui_players_${mpState.roomCode}`, currentUser.uid);
+                await updateDoc(playerRef, {
+                    score: mpState.localScore,
+                    streak: mpState.localStreak,
+                    correctCount: mpState.localCorrectCount,
+                    answeredQIndex: qIdx,
+                    lastAnswer: selectedText,
+                    lastCorrect: isCorrect,
+                    lastEarned: earned
+                });
+            } catch (err) {
+                console.error("Submit answer error:", err);
+            }
+        };
+
+        // ==================== 3. Firestore 即時監聽與畫面渲染 ====================
+        function subscribeToRoom(code) {
+            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'dizigui_rooms', code);
+            const playersCol = collection(db, 'artifacts', appId, 'public', 'data', `dizigui_players_${code}`);
+
+            mpState.unsubRoom = onSnapshot(roomRef, (snap) => {
+                if (!snap.exists()) return;
+                const prevStatus = mpState.roomData?.status;
+                const prevQIdx = mpState.roomData?.currentQIndex;
+                mpState.roomData = snap.data();
+
+                if (mpState.roomData.status === 'question' && (prevStatus !== 'question' || prevQIdx !== mpState.roomData.currentQIndex)) {
+                    startQuestionTimer();
+                } else if (mpState.roomData.status !== 'question' && mpState.timerInterval) {
+                    clearInterval(mpState.timerInterval);
+                    mpState.timerInterval = null;
+                }
+
+                renderMultiplayerView();
+            }, (err) => {
+                console.error("Room snapshot error:", err);
+            });
+
+            mpState.unsubPlayers = onSnapshot(playersCol, (snap) => {
+                const list = [];
+                snap.forEach(d => list.push(d.data()));
+                list.sort((a, b) => (b.score || 0) - (a.score || 0));
+                mpState.players = list;
+                renderMultiplayerView();
+            }, (err) => {
+                console.error("Players snapshot error:", err);
+            });
+        }
+
+        function startQuestionTimer() {
+            if (mpState.timerInterval) clearInterval(mpState.timerInterval);
+            const updateTick = () => {
+                if (!mpState.roomData || mpState.roomData.status !== 'question') return;
+                const start = mpState.roomData.questionStartTime || Date.now();
+                const left = Math.max(0, 20 - Math.floor((Date.now() - start) / 1000));
+                mpState.timeLeft = left;
+                const timerEl = document.getElementById('mpTimerText');
+                if (timerEl) timerEl.textContent = left;
+
+                if (left === 0 && mpState.role === 'host') {
+                    hostRevealAnswer();
+                }
+            };
+            updateTick();
+            mpState.timerInterval = setInterval(updateTick, 500);
+        }
+
+        window.copyRoomLink = function () {
+            const url = getRoomShareUrl(mpState.roomCode);
+            const tempInput = document.createElement('input');
+            tempInput.value = url;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            playSFX('click');
+            showMpToast('已複製房間邀請連結，可直接傳送給大家！', 'Tautan undangan ruangan berhasil disalin!');
+        };
+
+        function renderMultiplayerView() {
+            const container = document.getElementById('mpContainer');
+            const room = mpState.roomData;
+            if (!container || !room) return;
+
+            const isHost = (mpState.role === 'host');
+            const questions = JSON.parse(room.questionsJson || '[]');
+            const qIdx = room.currentQIndex || 0;
+            const currentQ = questions[qIdx];
+
+            // ---------- 狀態 A：等待大廳 (lobby) ----------
+            if (room.status === 'lobby') {
+                if (isHost) {
+                    const shareUrl = getRoomShareUrl(room.roomCode);
+                    container.innerHTML = `
+                        <div class="text-center fade-in">
+                            <span class="seal-stamp text-xs sm:text-sm mb-2 ruby-line">
+                                📲 ${toRubyHTML('掃碼加入')}・${toRubyHTML('入則孝共學大廳')}
+                            </span>
+                            <h2 class="text-2xl sm:text-3xl font-bold text-[#26221e] mb-4 ruby-line">
+                                ${toRubyHTML('請用手機相機掃描下方二維碼')}
+                            </h2>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center bg-[#f7f2e6] p-5 rounded-2xl border border-[#dfd3be] mb-6">
+                                <!-- QR Code 與六位數房號 -->
+                                <div class="flex flex-col items-center justify-center bg-white p-4 rounded-xl border-2 border-[#c59b43] shadow-sm">
+                                    <div id="qrcodeBox" class="mb-3 bg-white p-2 rounded-lg"></div>
+                                    <div class="text-xs text-[#6e6252] ruby-line">${toRubyHTML('或手動輸入房號')} (Room PIN)</div>
+                                    <div class="text-3xl sm:text-4xl font-black tracking-[0.2em] text-[#b8332a] my-1">${room.roomCode}</div>
+                                    <button onclick="copyRoomLink()" class="mt-2 px-3 py-1.5 rounded-lg bg-[#f2ead8] hover:bg-[#e6dac0] text-xs font-bold text-[#5c5346] cursor-pointer ruby-line">
+                                        📋 ${toRubyHTML('複製邀請網址')}
+                                    </button>
+                                </div>
+
+                                <!-- 題型選擇與已加入學員名單 -->
+                                <div class="text-left flex flex-col justify-between h-full">
+                                    <div>
+                                        <div class="text-sm font-bold text-[#26221e] mb-2 ruby-line">
+                                            1. ${toRubyHTML('選擇共學題型')}：
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-2 mb-4">
+                                            <button onclick="hostSelectMode('classic')" class="py-2 px-2 rounded-lg text-xs font-bold border cursor-pointer ruby-line ${room.mode === 'classic' ? 'bg-[#b8332a] text-white border-[#8f221b]' : 'bg-white text-[#26221e] border-[#cbbba0]'}">
+                                                ${toRubyHTML('經典接龍')}
+                                            </button>
+                                            <button onclick="hostSelectMode('scenario')" class="py-2 px-2 rounded-lg text-xs font-bold border cursor-pointer ruby-line ${room.mode === 'scenario' ? 'bg-[#b8332a] text-white border-[#8f221b]' : 'bg-white text-[#26221e] border-[#cbbba0]'}">
+                                                ${toRubyHTML('生活孝道')}
+                                            </button>
+                                            <button onclick="hostSelectMode('mixed')" class="py-2 px-2 rounded-lg text-xs font-bold border cursor-pointer ruby-line ${room.mode === 'mixed' ? 'bg-[#b8332a] text-white border-[#8f221b]' : 'bg-white text-[#26221e] border-[#cbbba0]'}">
+                                                ${toRubyHTML('綜合殿試')}
+                                            </button>
+                                        </div>
+
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-sm font-bold text-[#26221e] ruby-line">
+                                                2. ${toRubyHTML('已報到學員')} (${mpState.players.length} ${toRubyHTML('位')})：
+                                            </span>
+                                        </div>
+                                        <div class="bg-white/90 rounded-xl p-3 border border-[#dfd3be] min-h-[120px] max-h-48 overflow-y-auto flex flex-wrap gap-2 content-start">
+                                            ${mpState.players.length === 0
+                                                ? `<p class="text-xs text-[#7a6e5d] w-full text-center py-8 ruby-line">${toRubyHTML('暫時尚未有學員加入，等待掃碼中')}...</p>`
+                                                : mpState.players.map(p => `
+                                                    <span class="px-3 py-1.5 rounded-full bg-[#eef7f3] border border-[#3b6e5c] text-[#244f40] text-xs sm:text-sm font-bold flex items-center gap-1.5">
+                                                        <span>🎓</span>
+                                                        <span>${escapeHtml(p.name)}</span>
+                                                    </span>
+                                                `).join('')
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <button onclick="hostStartGame()" class="btn-cinnabar w-full py-3.5 rounded-xl font-bold text-base sm:text-lg mt-4 cursor-pointer ruby-line">
+                                        🏮 ${toRubyHTML('開始共學闖關')} (${mpState.players.length} ${toRubyHTML('人')}) →
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    const qrEl = document.getElementById('qrcodeBox');
+                    if (qrEl && typeof QRCode !== 'undefined') {
+                        qrEl.innerHTML = '';
+                        new QRCode(qrEl, {
+                            text: shareUrl,
+                            width: 176,
+                            height: 176,
+                            colorDark: "#26221e",
+                            colorLight: "#ffffff",
+                            correctLevel: QRCode.CorrectLevel.M
+                        });
+                    }
+                } else {
+                    container.innerHTML = `
+                        <div class="text-center py-6 fade-in">
+                            <span class="seal-stamp text-xs sm:text-sm mb-3 ruby-line">
+                                ✅ ${toRubyHTML('報到成功')}・${toRubyHTML('房號')} ${room.roomCode}
+                            </span>
+                            <h2 class="text-2xl sm:text-3xl font-bold text-[#26221e] mb-2 ruby-line">
+                                ${toRubyHTML('歡迎')}，${escapeHtml(mpState.playerName)}！
+                            </h2>
+                            <p class="text-sm text-[#5c5346] mb-1 ruby-line">
+                                ${toRubyHTML('請等候主持人開始共學闖關')}...
+                            </p>
+                            <p class="text-xs text-[#3b6e5c] italic mb-6">
+                                Berhasil bergabung! Menunggu pemandu memulai permainan...
+                            </p>
+
+                            <div class="max-w-md mx-auto bg-[#f7f2e6] rounded-xl p-4 border border-[#dfd3be]">
+                                <div class="text-xs font-bold text-[#6e6252] mb-2 ruby-line">
+                                    ${toRubyHTML('同堂學員')} (${mpState.players.length} ${toRubyHTML('位')})
+                                </div>
+                                <div class="flex flex-wrap justify-center gap-2">
+                                    ${mpState.players.map(p => `
+                                        <span class="px-3 py-1 rounded-full text-xs font-bold ${p.uid === currentUser?.uid ? 'bg-[#b8332a] text-white' : 'bg-white border border-[#cbbba0] text-[#26221e]'}">
+                                            ${escapeHtml(p.name)}
+                                        </span>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                return;
+            }
+
+            // ---------- 狀態 B：作答進行中 (question) ----------
+            if (room.status === 'question' && currentQ) {
+                const answeredCount = mpState.players.filter(p => p.answeredQIndex === qIdx).length;
+                const labels = ['甲', '乙', '丙', '丁'];
+                const opts = currentQ.shuffledOptions || currentQ.options;
+
+                if (isHost) {
+                    container.innerHTML = `
+                        <div class="fade-in">
+                            <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-5 border-b border-[#e3d7c3]">
+                                <div class="flex items-center gap-2">
+                                    <span class="seal-stamp text-xs ruby-line">${toRubyHTML('房號')} ${room.roomCode}</span>
+                                    <span class="text-sm font-bold text-[#5c5346] ruby-line">
+                                        ${toRubyHTML('第')} <span class="text-[#b8332a] text-base">${qIdx + 1}</span> / ${questions.length} ${toRubyHTML('題')}
+                                    </span>
+                                </div>
+
+                                <div class="flex items-center gap-3">
+                                    <div class="px-3 py-1 rounded-lg bg-[#fdf3dc] border border-[#e0be6b] text-xs sm:text-sm font-bold text-[#9c6b19] ruby-line">
+                                        ⏳ ${toRubyHTML('倒數')} <span id="mpTimerText" class="text-base font-black text-[#b8332a]">${mpState.timeLeft}</span> ${toRubyHTML('秒')}
+                                    </div>
+                                    <div class="px-3 py-1 rounded-lg bg-[#eef7f3] border border-[#3b6e5c] text-xs sm:text-sm font-bold text-[#244f40] ruby-line">
+                                        ✍️ ${toRubyHTML('已作答')}：${answeredCount} / ${mpState.players.length}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <span class="text-xs sm:text-sm font-semibold px-3 py-1 rounded bg-[#ebe2d0] text-[#5c5346] ruby-line">
+                                    《${toRubyHTML('弟子規')}》・${toRubyHTML(currentQ.chapter)}
+                                </span>
+                            </div>
+
+                            <div class="bg-[#f7f2e6] border border-[#dfd3be] rounded-xl p-5 sm:p-6 text-center mb-6">
+                                ${currentQ.qType === 'classic'
+                                    ? `<div class="text-xs sm:text-sm text-[#7a6e5d] mb-2 ruby-line">${toRubyHTML('請接出正確的下一句經文')}</div>
+                                       <div class="text-2xl sm:text-3xl font-bold text-[#26221e] ruby-line">${toRubyHTML(currentQ.promptPrefix)}<span class="border-b-2 border-[#b8332a] text-[#b8332a] px-3 mx-1">______</span>。</div>`
+                                    : `<div class="inline-block text-xs font-bold text-[#b8332a] bg-[#fae8e6] px-3 py-1 rounded mb-2 ruby-line">【${toRubyHTML('情境')}】${toRubyHTML(currentQ.scenarioTitle)}</div>
+                                       <p class="text-lg sm:text-2xl font-bold text-[#26221e] ruby-line">${toRubyHTML(currentQ.situation)}</p>`
+                                }
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                                ${opts.map((optText, i) => `
+                                    <div class="rounded-xl p-4 border border-[#cbbba0] bg-white flex items-center gap-3">
+                                        <span class="w-8 h-8 rounded-full border border-[#cbbba0] bg-[#f5efe2] text-[#5c5346] font-bold text-xs flex items-center justify-center shrink-0">${labels[i]}</span>
+                                        <span class="font-bold text-base sm:text-lg text-[#26221e] ruby-line">${toRubyHTML(optText)}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+
+                            <div class="text-right">
+                                <button onclick="hostRevealAnswer()" class="btn-cinnabar px-6 py-3 rounded-xl font-bold text-sm sm:text-base cursor-pointer ruby-line">
+                                    📜 ${toRubyHTML('公佈正解與印尼文解析')} →
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const hasAnswered = (mpState.localAnsweredQIdx === qIdx);
+                    container.innerHTML = `
+                        <div class="fade-in">
+                            <div class="flex items-center justify-between pb-3 mb-4 border-b border-[#e3d7c3]">
+                                <span class="text-xs sm:text-sm font-bold text-[#5c5346] ruby-line">
+                                    ${toRubyHTML('第')} <span class="text-[#b8332a] text-base">${qIdx + 1}</span> / ${questions.length} ${toRubyHTML('題')}
+                                </span>
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2.5 py-1 rounded bg-[#fdf3dc] text-xs font-bold text-[#9c6b19] ruby-line">
+                                        ⏳ <span id="mpTimerText">${mpState.timeLeft}</span> ${toRubyHTML('秒')}
+                                    </span>
+                                    <span class="px-2.5 py-1 rounded bg-[#f2ead8] text-xs font-bold text-[#b8332a] ruby-line">
+                                        ${mpState.localScore} ${toRubyHTML('分')}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="bg-[#f7f2e6] border border-[#dfd3be] rounded-xl p-4 text-center mb-5">
+                                ${currentQ.qType === 'classic'
+                                    ? `<div class="text-xs text-[#7a6e5d] mb-1 ruby-line">${toRubyHTML('請接出正確的下一句經文')}</div>
+                                       <div class="text-xl sm:text-2xl font-bold text-[#26221e] ruby-line">${toRubyHTML(currentQ.promptPrefix)}<span class="border-b-2 border-[#b8332a] text-[#b8332a] px-2 mx-1">____</span>。</div>`
+                                    : `<div class="inline-block text-xs font-bold text-[#b8332a] bg-[#fae8e6] px-2.5 py-0.5 rounded mb-2 ruby-line">【${toRubyHTML('情境')}】${toRubyHTML(currentQ.scenarioTitle)}</div>
+                                       <p class="text-base sm:text-lg font-bold text-[#26221e] ruby-line">${toRubyHTML(currentQ.situation)}</p>`
+                                }
+                            </div>
+
+                            ${hasAnswered
+                                ? `<div class="text-center py-8 px-4 rounded-xl bg-[#eef7f3] border-2 border-[#3b6e5c] fade-in">
+                                        <div class="text-3xl mb-2">🔒</div>
+                                        <h3 class="text-lg font-bold text-[#244f40] mb-1 ruby-line">${toRubyHTML('答案已送出鎖定')}！</h3>
+                                        <p class="text-xs sm:text-sm text-[#3b6e5c] mb-3 ruby-line">${toRubyHTML('你的選擇')}：${toRubyHTML(mpState.localSelectedOption)}</p>
+                                        <p class="text-xs text-[#5c5346] italic">Jawaban terkunci! Menunggu pemandu menampilkan pembahasan...</p>
+                                   </div>`
+                                : `<div class="grid grid-cols-1 gap-3">
+                                        ${opts.map((optText, i) => `
+                                            <button onclick="playerSubmitAnswer('${optText.replace(/'/g, "\\'")}')" class="option-btn rounded-xl p-4 text-left flex items-center gap-3 cursor-pointer">
+                                                <span class="w-8 h-8 rounded-full border border-[#cbbba0] bg-[#f5efe2] text-[#5c5346] font-bold text-xs flex items-center justify-center shrink-0">${labels[i]}</span>
+                                                <span class="font-bold text-base sm:text-lg text-[#26221e] ruby-line">${toRubyHTML(optText)}</span>
+                                            </button>
+                                        `).join('')}
+                                   </div>`
+                            }
+                        </div>
+                    `;
+                }
+                return;
+            }
+
+            // ---------- 狀態 C：本題公佈答案與印尼文注解 (reveal) ----------
+            if (room.status === 'reveal' && currentQ) {
+                const me = mpState.players.find(p => p.uid === currentUser?.uid);
+                const myCorrect = me?.lastCorrect;
+                const isLast = (qIdx + 1 >= questions.length);
+
+                container.innerHTML = `
+                    <div class="fade-in">
+                        <div class="flex items-center justify-between pb-3 mb-4 border-b border-[#e3d7c3]">
+                            <span class="seal-stamp text-xs ruby-line">${toRubyHTML('第')} ${qIdx + 1} / ${questions.length} ${toRubyHTML('題')}・${toRubyHTML('解析')}</span>
+                            ${!isHost && me ? `<span class="text-sm font-bold text-[#b8332a] ruby-line">${toRubyHTML('目前積分')}：${me.score}</span>` : ''}
+                        </div>
+
+                        ${!isHost ? `
+                            <div class="rounded-xl p-4 mb-4 border-2 ${myCorrect ? 'border-[#3b6e5c] bg-[#eef7f3]' : 'border-[#b8332a] bg-[#fdf1f0]'}">
+                                <div class="font-bold text-base sm:text-lg ruby-line ${myCorrect ? 'text-[#244f40]' : 'text-[#8f221b]'}">
+                                    ${myCorrect
+                                        ? `✨ ${toRubyHTML('善哉！答對了！')} (+${me?.lastEarned || 100} ${toRubyHTML('分')}) — Benar sekali!`
+                                        : `📜 ${toRubyHTML('惜哉！再細品聖訓')} — Kurang tepat!`}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <div class="rounded-xl p-5 bg-[#f7f2e6] border-2 border-[#c59b43] mb-4">
+                            <div class="text-xs font-bold text-[#8c6229] mb-1 ruby-line">✔ ${toRubyHTML('正確聖訓')}</div>
+                            <div class="text-xl sm:text-2xl font-bold text-[#26221e] mb-3 ruby-line">
+                                ${toRubyHTML(currentQ.fullVerse)}
+                            </div>
+                            <div class="p-3.5 rounded-lg bg-white border-l-4 border-[#3b6e5c]">
+                                <div class="text-xs font-bold uppercase tracking-wider text-[#3b6e5c] mb-1">
+                                    🇮🇩 Penjelasan Bahasa Indonesia (印尼文注解)
+                                </div>
+                                <p class="text-sm sm:text-base text-[#26221e] font-medium leading-relaxed">
+                                    ${currentQ.explanationIndo}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="bg-white/90 rounded-xl p-4 border border-[#dfd3be] mb-5">
+                            <div class="text-xs sm:text-sm font-bold text-[#26221e] mb-2 ruby-line">
+                                🏆 ${toRubyHTML('即時文采值排行榜')}
+                            </div>
+                            <div class="space-y-2">
+                                ${mpState.players.slice(0, 5).map((p, idx) => `
+                                    <div class="flex items-center justify-between px-3 py-2 rounded-lg ${p.uid === currentUser?.uid ? 'bg-[#fdf3dc] border border-[#e0be6b]' : 'bg-[#faf6ed]'}">
+                                        <div class="flex items-center gap-2 font-bold text-sm">
+                                            <span class="w-6 h-6 rounded-full bg-[#b8332a] text-white text-xs flex items-center justify-center">${idx + 1}</span>
+                                            <span>${escapeHtml(p.name)}</span>
+                                        </div>
+                                        <span class="font-black text-[#b8332a] text-sm">${p.score || 0}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        ${isHost ? `
+                            <div class="text-right">
+                                <button onclick="hostNextStep()" class="btn-cinnabar px-6 py-3 rounded-xl font-bold text-sm sm:text-base cursor-pointer ruby-line">
+                                    ${isLast ? `${toRubyHTML('完成考核・書院放榜')} →` : `${toRubyHTML('繼續下一題')} →`}
+                                </button>
+                            </div>
+                        ` : `
+                            <p class="text-center text-xs text-[#6e6252] ruby-line">
+                                ${toRubyHTML('等候主持人進入下一題')}...
+                            </p>
+                        `}
+                    </div>
+                `;
+                return;
+            }
+
+            // ---------- 狀態 D：最終放榜功名排行榜 (finished) ----------
+            if (room.status === 'finished') {
+                const titles = ['狀元', '榜眼', '探花', '舉人', '秀才'];
+                container.innerHTML = `
+                    <div class="text-center fade-in">
+                        <p class="text-xs sm:text-sm text-[#6e6252] tracking-widest mb-2 ruby-line">
+                            ${toRubyHTML('入則孝共學圓滿')}・${toRubyHTML('書院金榜')}
+                        </p>
+                        <h2 class="font-calligraphy text-4xl sm:text-5xl text-[#b8332a] mb-6 ruby-title ruby-line">
+                            ${toRubyHTML('孝道書院功名榜')}
+                        </h2>
+
+                        <div class="max-w-xl mx-auto space-y-3 mb-7 text-left">
+                            ${mpState.players.map((p, idx) => {
+                                const title = titles[idx] || '童生';
+                                return `
+                                    <div class="flex items-center justify-between p-4 rounded-xl border-2 ${idx === 0 ? 'bg-[#fdf3dc] border-[#c59b43] shadow-md' : 'bg-[#faf6ed] border-[#dfd3be]'}">
+                                        <div class="flex items-center gap-3">
+                                            <span class="seal-stamp text-xs sm:text-sm ruby-line">${toRubyHTML(title)}</span>
+                                            <div>
+                                                <div class="font-bold text-base sm:text-lg text-[#26221e]">${escapeHtml(p.name)}</div>
+                                                <div class="text-xs text-[#6e6252] ruby-line">${toRubyHTML('答對')} ${p.correctCount || 0} / ${questions.length} ${toRubyHTML('題')}</div>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <div class="text-xl sm:text-2xl font-black text-[#b8332a]">${p.score || 0}</div>
+                                            <div class="text-[11px] text-[#7a6e5d] ruby-line">${toRubyHTML('文采值')}</div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+
+                        <button onclick="returnToMenu()" class="btn-cinnabar px-8 py-3 rounded-xl font-bold text-base cursor-pointer ruby-line">
+                            ${toRubyHTML('返回首頁')}
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const roomParam = params.get('room');
+            if (roomParam && /^\d{6}$/.test(roomParam.trim())) {
+                openJoinRoom(roomParam.trim());
+            }
+        });
+    </script>
+</body>
+</html>
